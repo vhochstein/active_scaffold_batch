@@ -1,0 +1,6 @@
+<%= render :partial => "base_form", :locals => {:xhr => xhr ||= nil,
+                                                :form_action => form_action ||= :batch_update,
+                                                :method => method ||= :post,
+                                                :cancel_link => cancel_link ||= true,
+                                                :headline => headline ||= active_scaffold_config.batch_update.label} %>
+

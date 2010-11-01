@@ -5,6 +5,7 @@ module ActiveScaffold::Actions
       base.verify :method => [:post, :put],
                   :only => :batch_update,
                   :redirect_to => { :action => :index }
+      base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchUpdate.plugin_directory, 'frontends', 'default' , 'views')
     end
 
     def batch_edit
@@ -57,6 +58,8 @@ module ActiveScaffold::Actions
     end
 
     def do_batch_edit
+      @successful = true
+      do_new
     end
 
     def do_batch_update

@@ -16,6 +16,11 @@ module ActiveScaffold::Config
     end
     @@link = ActiveScaffold::DataStructures::ActionLink.new('batch_edit', :label => :batch_edit, :type => :collection, :security_method => :batch_update_authorized?)
 
+    # configures where the plugin itself is located. there is no instance version of this.
+    cattr_accessor :plugin_directory
+    @@plugin_directory = File.expand_path(__FILE__).match(/vendor\/plugins\/([^\/]*)/)[1]
+
+
     # instance-level configuration
     # ----------------------------
 
