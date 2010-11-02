@@ -14,7 +14,13 @@ module ActiveScaffold::Actions
     end
 
     def batch_update
-      do_batch_update
+      selected_columns = params[:batch_update]
+      if !selected_columns.nil? && selected_columns.is_a?(Array)
+        #selected_columns.collect!{|col_name| col_name.to_sym}
+        do_batch_update(selected_columns)
+      else
+        self.successful = false
+      end
       respond_to_action(:batch_update)
     end
 
@@ -58,16 +64,22 @@ module ActiveScaffold::Actions
     end
 
     def do_batch_edit
-      @successful = true
+      self.successful = true
       do_new
     end
 
-    def do_batch_update
+    def do_batch_update(selected_columns)
+      update_columns = active_scaffold_config.batch_update.columns
+
+      template_record = active_scaffold_config.model.new
+      template_record = update_record_from_params(template_record, update_columns, params[:record])
+      update_attributes = template_record.attributes.slice(*selected_columns)
+      
       active_scaffold_config.model.marked.each do |marked_record|
-        # we have to detect to be updated columns ??
         if marked_record.authorized_for?(:crud_type => :update)
           @record = marked_record
-          do_update
+          @record.attributes = update_attributes
+          update_save
           if successful?
             @record.marked = false
           else
