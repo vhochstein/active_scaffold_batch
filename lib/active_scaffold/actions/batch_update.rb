@@ -19,15 +19,16 @@ module ActiveScaffold::Actions
         #selected_columns.collect!{|col_name| col_name.to_sym}
         do_batch_update(selected_columns)
       else
-        self.successful = false
+        @batch_successful = false
       end
+      do_list if batch_successful?
       respond_to_action(:batch_update)
     end
 
     
     protected
     def batch_edit_respond_to_html
-      if successful?
+      if batch_successful?
         render(:action => 'batch_update')
       else
         return_to_main
@@ -42,7 +43,7 @@ module ActiveScaffold::Actions
           render :action => 'on_batch_update.js', :layout => false
         end
       else # just a regular post
-        if successful?
+        if batch_successful?
           flash[:info] = as_(:updated_model, :model => @record.to_label)
           return_to_main
         else
@@ -83,12 +84,19 @@ module ActiveScaffold::Actions
           if successful?
             @record.marked = false
           else
+            @batch_successful = false
             #copy errors from record and collect them
           end
         else
+          @batch_successful = false
           # some info that you are not authorized to update this record
         end
       end
+    end
+
+    def batch_successful?
+      @batch_successful = true if @batch_successful.nil?
+      @batch_successful
     end
 
     
