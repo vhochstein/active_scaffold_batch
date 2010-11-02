@@ -63,7 +63,20 @@ module ActiveScaffold::Actions
     end
 
     def do_batch_update
-
+      active_scaffold_config.model.marked.each do |marked_record|
+        # we have to detect to be updated columns ??
+        if marked_record.authorized_for?(:crud_type => :update)
+          @record = marked_record
+          do_update
+          if successful?
+            @record.marked = false
+          else
+            #copy errors from record and collect them
+          end
+        else
+          # some info that you are not authorized to update this record
+        end
+      end
     end
 
     
