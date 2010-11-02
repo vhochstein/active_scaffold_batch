@@ -71,15 +71,16 @@ module ActiveScaffold::Actions
 
     def do_batch_update(selected_columns)
       update_columns = active_scaffold_config.batch_update.columns
-
       template_record = active_scaffold_config.model.new
       template_record = update_record_from_params(template_record, update_columns, params[:record])
-      update_attributes = template_record.attributes.slice(*selected_columns)
-      
+
       active_scaffold_config.model.marked.each do |marked_record|
         if marked_record.authorized_for?(:crud_type => :update)
+          @successful = nil
           @record = marked_record
-          @record.attributes = update_attributes
+          selected_columns.each do |attribute|
+            @record.send("#{attribute}=", template_record.send(attribute.to_sym))
+          end
           update_save
           if successful?
             @record.marked = false
