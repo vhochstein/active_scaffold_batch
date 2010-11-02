@@ -15,7 +15,7 @@
   <% else
     renders_as = :field if renders_as == :subform -%>
   <li class="form-element <%= column.css_class unless column.css_class.nil? %>">
-    <%= render :partial => form_partial_for_column(column, renders_as), :locals => { :column => column } -%>
+    <%= render :partial => 'batch_update_form_attribute', :locals => { :column => column } -%>
   </li>
   <% end -%>
   <% end -%>

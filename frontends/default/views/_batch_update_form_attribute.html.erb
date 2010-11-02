@@ -1,0 +1,13 @@
+<% scope ||= nil %>
+<dl>
+  <dt>
+    <%= check_box_tag 'batch_update[]', column.name.to_s, false, {:id => nil}%>
+    <label for="<%= active_scaffold_input_options(column, scope)[:id] %>"><%= column.label %></label>
+  </dt>
+  <dd>
+    <%= active_scaffold_input_for column, scope %>
+    <% if column.description -%>
+      <span class="description"><%= column.description %></span>
+    <% end -%>
+  </dd>
+</dl>
