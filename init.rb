@@ -5,6 +5,7 @@ ActiveScaffold rescue throw "should have included ActiveScaffold plug in first. 
 require "#{File.dirname(__FILE__)}/lib/active_scaffold_batch/config/core.rb"
 require "#{File.dirname(__FILE__)}/lib/active_scaffold/config/batch_update.rb"
 require "#{File.dirname(__FILE__)}/lib/active_scaffold/actions/batch_update.rb"
+require "#{File.dirname(__FILE__)}/lib/active_scaffold/helpers/view_helpers_override.rb"
 
 ##
 ## Run the install script, too, just to make sure

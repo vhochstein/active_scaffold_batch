@@ -1,5 +1,12 @@
 module ActiveScaffold::Actions
   module BatchUpdate
+    NumericOperators = [
+      'PLUS',
+      'MINUS',
+      'TIMES',
+      'DIVISION',
+      'REPLACE'
+    ]
     def self.included(base)
       base.before_filter :batch_update_authorized_filter, :only => [:batch_edit, :batch_update]
       base.verify :method => [:post, :put],
@@ -34,9 +41,11 @@ module ActiveScaffold::Actions
         return_to_main
       end
     end
+
     def batch_edit_respond_to_js
       render(:partial => 'batch_update_form')
     end
+
     def batch_update_respond_to_html
       if params[:iframe]=='true' # was this an iframe post ?
         responds_to_parent do
@@ -51,15 +60,19 @@ module ActiveScaffold::Actions
         end
       end
     end
+
     def batch_update_respond_to_js
       render :action => 'on_batch_update'
     end
+
     def batch_update_respond_to_xml
       render :xml => response_object.to_xml(:only => active_scaffold_config.batch_update.columns.names), :content_type => Mime::XML, :status => response_status
     end
+
     def batch_update_respond_to_json
       render :text => response_object.to_json(:only => active_scaffold_config.batch_update.columns.names), :content_type => Mime::JSON, :status => response_status
     end
+
     def batch_update_respond_to_yaml
       render :text => Hash.from_xml(response_object.to_xml(:only => active_scaffold_config.batch_update.columns.names)).to_yaml, :content_type => Mime::YAML, :status => response_status
     end
@@ -71,15 +84,21 @@ module ActiveScaffold::Actions
 
     def do_batch_update(selected_columns)
       update_columns = active_scaffold_config.batch_update.columns
-      template_record = active_scaffold_config.model.new
-      template_record = update_record_from_params(template_record, update_columns, params[:record])
+      attribute_values = attribute_values_from_params(update_columns, params[:record])
 
       active_scaffold_config.model.marked.each do |marked_record|
         if marked_record.authorized_for?(:crud_type => :update)
           @successful = nil
           @record = marked_record
           selected_columns.each do |attribute|
-            @record.send("#{attribute}=", template_record.send(attribute.to_sym))
+            column = attribute_values[attribute.to_sym][:column]
+            if column.form_ui && override_batch_update_value?(column.form_ui) 
+              @record.send("#{attribute}=", send(override_batch_update_value(column.form_ui), column, @record, attribute_values[attribute.to_sym][:value]))
+            elsif column.column && override_batch_update_value?(column.column.type)
+              @record.send("#{attribute}=", send(override_batch_update_value(column.column.type), column, @record, attribute_values[attribute.to_sym][:value]))
+            else
+              @record.send("#{attribute}=", attribute_values[attribute.to_sym][:value])
+            end
           end
           update_save
           if successful?
@@ -100,13 +119,55 @@ module ActiveScaffold::Actions
       @batch_successful
     end
 
+    def attribute_values_from_params(columns, attributes)
+      values = {}
+      columns.each :for => active_scaffold_config.model.new, :crud_type => :update, :flatten => true do |column|
+        values[column.name] = {:column => column, :value => column_value_from_param_value(nil, column, attributes[column.name])}
+      end
+      values
+    end
+
     
     # The default security delegates to ActiveRecordPermissions.
     # You may override the method to customize.
     def batch_update_authorized?(record = nil)
       authorized_for?(:crud_type => :update)
     end
+
+    def batch_update_value_for_numeric(column, record, calculation_info)
+      if ActiveScaffold::Actions::BatchUpdate::NumericOperators.include?(calculation_info[:opt])
+        operand = self.class.condition_value_for_numeric(column, calculation_info[:value])
+        if calculation_info[:opt] == 'REPLACE'
+          operand
+        else
+          case calculation_info[:opt]
+          when 'PLUS' then record.send(column.name) + operand
+          when 'MINUS' then record.send(column.name) - operand
+          when 'TIMES' then record.send(column.name) * operand
+          when 'DIVISION' then record.send(column.name) / operand
+          else
+            record.send(column.name)
+          end
+        end
+      else
+        record.send(column.name)
+      end
+    end
+    alias_method :batch_update_value_for_integer, :batch_update_value_for_numeric
+    alias_method :batch_update_value_for_decimal, :batch_update_value_for_numeric
+    alias_method :batch_update_value_for_float, :batch_update_value_for_numeric
+
+    def override_batch_update_value?(form_ui)
+      respond_to?(override_batch_update_value(form_ui))
+    end
+
+    # the naming convention for overriding form fields with helpers
+    def override_batch_update_value(form_ui)
+      "batch_update_value_for_#{form_ui}"
+    end
+
     private
+
     def batch_update_authorized_filter
       link = active_scaffold_config.batch_update.link || active_scaffold_config.batch_update.class.link
       raise ActiveScaffold::ActionNotAllowed unless self.send(link.security_method)

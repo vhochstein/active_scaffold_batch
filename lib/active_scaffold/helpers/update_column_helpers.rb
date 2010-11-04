@@ -10,22 +10,23 @@ module ActiveScaffold
         # first, check if the dev has created an override for this specific field for search
         if override_update_field?(column)
           send(override_update_field(column), @record, options)
-
         # second, check if the dev has specified a valid form_ui for this column, using specific ui for searches
         elsif column.form_ui and override_update?(column.form_ui)
           send(override_update(column.update_ui), column, options)
+       elsif column.column and override_update?(column.column.type)
+          send(override_update(column.column.type), column, options)
         else
           active_scaffold_input_for(column, scope, options)
         end
       end
 
       def active_scaffold_update_numeric(column, options)
-        select_options = ActiveScaffold::Finder::NumericOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
-        html = select_tag("#{column.name}[opt]",
-              options_for_select(select_options, opt_value),
+        select_options = ActiveScaffold::Actions::BatchUpdate::NumericOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
+        html = select_tag("[record][#{column.name}][opt]",
+              options_for_select(select_options, 'REPLACE'),
               :id => "#{options[:id]}_opt",
               :class => "as_update_numeric_option")
-        html << ' ' << text_field_tag("#{column.name}[value]", nil, options)
+        html << ' ' << text_field_tag("[record][#{column.name}][value]", nil, active_scaffold_input_text_options)
         html
       end
       alias_method :active_scaffold_update_integer, :active_scaffold_update_numeric
