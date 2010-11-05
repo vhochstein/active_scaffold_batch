@@ -11,6 +11,13 @@ module ActiveScaffold::Actions
       'ABSOLUTE',
       'PERCENT'
     ]
+
+    DateOperators = [
+      'PLUS',
+      'MINUS',
+      'REPLACE'
+    ]
+    
     def self.included(base)
       base.before_filter :batch_update_authorized_filter, :only => [:batch_edit, :batch_update]
       base.verify :method => [:post, :put],

@@ -12,7 +12,7 @@ module ActiveScaffold
           send(override_update_field(column), @record, options)
         # second, check if the dev has specified a valid form_ui for this column, using specific ui for searches
         elsif column.form_ui and override_update?(column.form_ui)
-          send(override_update(column.update_ui), column, options)
+          send(override_update(column.form_ui), column, options)
        elsif column.column and override_update?(column.column.type)
           send(override_update(column.column.type), column, options)
         else
