@@ -7,6 +7,10 @@ module ActiveScaffold::Actions
       'DIVISION',
       'REPLACE'
     ]
+    NumericOptions = [
+      'ABSOLUTE',
+      'PERCENT'
+    ]
     def self.included(base)
       base.before_filter :batch_update_authorized_filter, :only => [:batch_edit, :batch_update]
       base.verify :method => [:post, :put],
@@ -88,29 +92,38 @@ module ActiveScaffold::Actions
 
       active_scaffold_config.model.marked.each do |marked_record|
         if marked_record.authorized_for?(:crud_type => :update)
-          @successful = nil
-          @record = marked_record
-          selected_columns.each do |attribute|
-            column = attribute_values[attribute.to_sym][:column]
-            if column.form_ui && override_batch_update_value?(column.form_ui) 
-              @record.send("#{attribute}=", send(override_batch_update_value(column.form_ui), column, @record, attribute_values[attribute.to_sym][:value]))
-            elsif column.column && override_batch_update_value?(column.column.type)
-              @record.send("#{attribute}=", send(override_batch_update_value(column.column.type), column, @record, attribute_values[attribute.to_sym][:value]))
-            else
-              @record.send("#{attribute}=", attribute_values[attribute.to_sym][:value])
-            end
-          end
-          update_save
-          if successful?
-            @record.marked = false
-          else
-            @batch_successful = false
-            #copy errors from record and collect them
-          end
+          update_record(selected_columns, attribute_values, marked_record)
         else
           @batch_successful = false
           # some info that you are not authorized to update this record
         end
+      end
+    end
+
+    def update_record(selected_columns, attribute_values, record)
+      @successful = nil
+      @record = record
+
+      selected_columns.each do |attribute|
+        set_record_attribute(attribute_values[attribute.to_sym][:column], attribute, attribute_values[attribute.to_sym][:value])
+      end
+      
+      update_save
+      if successful?
+        @record.marked = false
+      else
+        @batch_successful = false
+        #copy errors from record and collect them
+      end
+    end
+
+    def set_record_attribute(column, attribute, value)
+      if column.form_ui && override_batch_update_value?(column.form_ui)
+        @record.send("#{attribute}=", send(override_batch_update_value(column.form_ui), column, @record, value))
+      elsif column.column && override_batch_update_value?(column.column.type)
+        @record.send("#{attribute}=", send(override_batch_update_value(column.column.type), column, @record, value))
+      else
+        @record.send("#{attribute}=", value)
       end
     end
 
@@ -135,22 +148,24 @@ module ActiveScaffold::Actions
     end
 
     def batch_update_value_for_numeric(column, record, calculation_info)
-      if ActiveScaffold::Actions::BatchUpdate::NumericOperators.include?(calculation_info[:opt])
+      current_value = record.send(column.name)
+      if ActiveScaffold::Actions::BatchUpdate::NumericOperators.include?(calculation_info[:operator])
         operand = self.class.condition_value_for_numeric(column, calculation_info[:value])
-        if calculation_info[:opt] == 'REPLACE'
+        operand = current_value / 100 * operand  if calculation_info[:opt] == 'PERCENT'
+        if calculation_info[:operator] == 'REPLACE'
           operand
         else
-          case calculation_info[:opt]
-          when 'PLUS' then record.send(column.name) + operand
-          when 'MINUS' then record.send(column.name) - operand
-          when 'TIMES' then record.send(column.name) * operand
-          when 'DIVISION' then record.send(column.name) / operand
+          case calculation_info[:operator]
+          when 'PLUS' then current_value + operand
+          when 'MINUS' then current_value - operand
+          when 'TIMES' then current_value * operand
+          when 'DIVISION' then current_value / operand
           else
-            record.send(column.name)
+            current_value
           end
         end
       else
-        record.send(column.name)
+        current_value
       end
     end
     alias_method :batch_update_value_for_integer, :batch_update_value_for_numeric

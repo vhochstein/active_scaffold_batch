@@ -21,12 +21,17 @@ module ActiveScaffold
       end
 
       def active_scaffold_update_numeric(column, options)
-        select_options = ActiveScaffold::Actions::BatchUpdate::NumericOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
-        html = select_tag("[record][#{column.name}][opt]",
-              options_for_select(select_options, 'REPLACE'),
-              :id => "#{options[:id]}_opt",
+        operator_options = ActiveScaffold::Actions::BatchUpdate::NumericOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
+        select_options = ActiveScaffold::Actions::BatchUpdate::NumericOptions.collect {|comp| [as_(comp.downcase.to_sym), comp]}
+        html = select_tag("[record][#{column.name}][operator]",
+              options_for_select(operator_options, 'REPLACE'),
+              :id => "#{options[:id]}_operator",
               :class => "as_update_numeric_option")
         html << ' ' << text_field_tag("[record][#{column.name}][value]", nil, active_scaffold_input_text_options)
+        html << ' ' << select_tag("[record][#{column.name}][opt]",
+              options_for_select(select_options, 'ABSOLUTE'),
+              :id => "#{options[:id]}_opt",
+              :class => "as_update_numeric_option")
         html
       end
       alias_method :active_scaffold_update_integer, :active_scaffold_update_numeric
