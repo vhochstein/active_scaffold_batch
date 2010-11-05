@@ -179,6 +179,30 @@ module ActiveScaffold::Actions
     alias_method :batch_update_value_for_decimal, :batch_update_value_for_numeric
     alias_method :batch_update_value_for_float, :batch_update_value_for_numeric
 
+    def batch_update_value_for_date_picker(column, record, calculation_info)
+      current_value = record.send(column.name)
+      {"number"=>"", "unit"=>"DAYS", "value"=>"November 16, 2010", "operator"=>"REPLACE"}
+      if ActiveScaffold::Actions::BatchUpdate::DateOperators.include?(calculation_info[:operator])
+        operand = self.class.condition_value_for_datetime(calculation_info[:value], column.column.type == :date ? :to_date : :to_time)
+        case calculation_info[:operator]
+        when 'REPLACE' then operand
+        when 'PLUS' then
+          trend_number = [calculation_info['number'].to_i,  1].max
+          current_value.in((trend_number).send(calculation_info['unit'].downcase.singularize.to_sym))
+        when 'MINUS' then
+          trend_number = [calculation_info['number'].to_i,  1].max
+          current_value.ago((trend_number).send(calculation_info['unit'].downcase.singularize.to_sym))
+        else
+          current_value
+        end
+      else
+        current_value
+      end
+    end
+    alias_method :batch_update_value_for_calendar_date_select, :batch_update_value_for_date_picker
+
+
+
     def override_batch_update_value?(form_ui)
       respond_to?(override_batch_update_value(form_ui))
     end
