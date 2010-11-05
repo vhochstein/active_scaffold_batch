@@ -27,7 +27,7 @@ module ActiveScaffold::Actions
     def batch_update
       selected_columns = params[:batch_update]
       if !selected_columns.nil? && selected_columns.is_a?(Array)
-        #selected_columns.collect!{|col_name| col_name.to_sym}
+        selected_columns.collect!{|col_name| col_name.to_sym}
         do_batch_update(selected_columns)
       else
         @batch_successful = false
@@ -88,11 +88,11 @@ module ActiveScaffold::Actions
 
     def do_batch_update(selected_columns)
       update_columns = active_scaffold_config.batch_update.columns
-      attribute_values = attribute_values_from_params(update_columns, params[:record])
+      attribute_values = attribute_values_from_params(update_columns, selected_columns, params[:record])
 
       active_scaffold_config.model.marked.each do |marked_record|
         if marked_record.authorized_for?(:crud_type => :update)
-          update_record(selected_columns, attribute_values, marked_record)
+          update_record(marked_record, attribute_values)
         else
           @batch_successful = false
           # some info that you are not authorized to update this record
@@ -100,12 +100,12 @@ module ActiveScaffold::Actions
       end
     end
 
-    def update_record(selected_columns, attribute_values, record)
+    def update_record(record, attribute_values)
       @successful = nil
       @record = record
 
-      selected_columns.each do |attribute|
-        set_record_attribute(attribute_values[attribute.to_sym][:column], attribute, attribute_values[attribute.to_sym][:value])
+      attribute_values.each do |attribute, value|
+        set_record_attribute(value[:column], attribute, value[:value])
       end
       
       update_save
@@ -132,10 +132,10 @@ module ActiveScaffold::Actions
       @batch_successful
     end
 
-    def attribute_values_from_params(columns, attributes)
+    def attribute_values_from_params(columns, selected_columns, attributes)
       values = {}
       columns.each :for => active_scaffold_config.model.new, :crud_type => :update, :flatten => true do |column|
-        values[column.name] = {:column => column, :value => column_value_from_param_value(nil, column, attributes[column.name])}
+        values[column.name] = {:column => column, :value => column_value_from_param_value(nil, column, attributes[column.name])} if selected_columns.include? column.name
       end
       values
     end
