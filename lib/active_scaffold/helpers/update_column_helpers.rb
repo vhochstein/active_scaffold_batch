@@ -16,7 +16,7 @@ module ActiveScaffold
        elsif column.column and override_update?(column.column.type)
           send(override_update(column.column.type), column, options)
         else
-          active_scaffold_input_for(column, scope, options)
+          active_scaffold_render_input(column, options)
         end
       end
 
