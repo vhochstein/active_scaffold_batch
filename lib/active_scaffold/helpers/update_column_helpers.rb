@@ -16,15 +16,30 @@ module ActiveScaffold
        elsif column.column and override_update?(column.column.type)
           send(override_update(column.column.type), column, options)
         else
-          active_scaffold_render_input(column, options)
+          active_scaffold_update_generic_operators_select(column, options)<< ' ' << active_scaffold_render_input(column, options.merge(:name => "record[#{column.name}][value]"))
         end
       end
 
+      def active_scaffold_update_generic_operators(column)
+        operators = ActiveScaffold::Actions::BatchUpdate::GenericOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
+        if column.column.nil? || column.column.null
+          operators << [as_(:null), 'NULL']
+        end
+        operators
+      end
+
+      def active_scaffold_update_generic_operators_select(column, options)
+        select_tag("[record][#{column.name}][operator]",
+              options_for_select(active_scaffold_update_generic_operators(column), 'NO_UPDATE'),
+              :id => "#{options[:id]}_operator",
+              :class => "as_batch_update_operator text_input")
+      end
+
       def active_scaffold_update_numeric(column, options)
-        operator_options = ActiveScaffold::Actions::BatchUpdate::NumericOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
+        operator_options = active_scaffold_update_generic_operators(column) + ActiveScaffold::Actions::BatchUpdate::NumericOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
         select_options = ActiveScaffold::Actions::BatchUpdate::NumericOptions.collect {|comp| [as_(comp.downcase.to_sym), comp]}
         html = select_tag("[record][#{column.name}][operator]",
-              options_for_select(operator_options, 'REPLACE'),
+              options_for_select(operator_options, 'NO_UPDATE'),
               :id => "#{options[:id]}_operator",
               :class => "as_update_numeric_option")
         html << ' ' << text_field_tag("[record][#{column.name}][value]", nil, active_scaffold_input_text_options)

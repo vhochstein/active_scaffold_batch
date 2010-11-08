@@ -1,11 +1,15 @@
 module ActiveScaffold::Actions
   module BatchUpdate
+
+    GenericOperators = [
+      'NO_UPDATE',
+      'REPLACE'
+    ]
     NumericOperators = [
       'PLUS',
       'MINUS',
       'TIMES',
-      'DIVISION',
-      'REPLACE'
+      'DIVISION'
     ]
     NumericOptions = [
       'ABSOLUTE',
@@ -14,8 +18,7 @@ module ActiveScaffold::Actions
 
     DateOperators = [
       'PLUS',
-      'MINUS',
-      'REPLACE'
+      'MINUS'
     ]
     
     def self.included(base)
@@ -32,10 +35,8 @@ module ActiveScaffold::Actions
     end
 
     def batch_update
-      selected_columns = params[:batch_update]
-      if !selected_columns.nil? && selected_columns.is_a?(Array)
-        selected_columns.collect!{|col_name| col_name.to_sym}
-        do_batch_update(selected_columns)
+      if !selected_columns.nil?
+        do_batch_update
       else
         @batch_successful = false
       end
@@ -51,6 +52,16 @@ module ActiveScaffold::Actions
       else
         return_to_main
       end
+    end
+
+    def selected_columns
+      if params[:record] && params[:record].is_a?(Hash)
+        @selected_columns = []
+        params[:record].each do |key, value|
+          @selected_columns << key.to_sym if value[:operator] != 'NO_UPDATE'
+        end
+      end if @selected_columns.nil?
+      @selected_columns
     end
 
     def batch_edit_respond_to_js
@@ -93,9 +104,9 @@ module ActiveScaffold::Actions
       do_new
     end
 
-    def do_batch_update(selected_columns)
+    def do_batch_update
       update_columns = active_scaffold_config.batch_update.columns
-      attribute_values = attribute_values_from_params(update_columns, selected_columns, params[:record])
+      attribute_values = attribute_values_from_params(update_columns, params[:record])
 
       active_scaffold_config.model.marked.each do |marked_record|
         if marked_record.authorized_for?(:crud_type => :update)
@@ -130,7 +141,7 @@ module ActiveScaffold::Actions
       elsif column.column && override_batch_update_value?(column.column.type)
         @record.send("#{attribute}=", send(override_batch_update_value(column.column.type), column, @record, value))
       else
-        @record.send("#{attribute}=", value)
+        @record.send("#{attribute}=", value[:operator] == 'NULL' ? nil : value[:value])
       end
     end
 
@@ -139,7 +150,7 @@ module ActiveScaffold::Actions
       @batch_successful
     end
 
-    def attribute_values_from_params(columns, selected_columns, attributes)
+    def attribute_values_from_params(columns, attributes)
       values = {}
       columns.each :for => active_scaffold_config.model.new, :crud_type => :update, :flatten => true do |column|
         values[column.name] = {:column => column, :value => column_value_from_param_value(nil, column, attributes[column.name])} if selected_columns.include? column.name
@@ -156,20 +167,18 @@ module ActiveScaffold::Actions
 
     def batch_update_value_for_numeric(column, record, calculation_info)
       current_value = record.send(column.name)
-      if ActiveScaffold::Actions::BatchUpdate::NumericOperators.include?(calculation_info[:operator])
+      if ActiveScaffold::Actions::BatchUpdate::GenericOperators.include?(calculation_info[:operator]) || ActiveScaffold::Actions::BatchUpdate::NumericOperators.include?(calculation_info[:operator])
         operand = self.class.condition_value_for_numeric(column, calculation_info[:value])
         operand = current_value / 100 * operand  if calculation_info[:opt] == 'PERCENT'
-        if calculation_info[:operator] == 'REPLACE'
-          operand
+        case calculation_info[:operator]
+        when 'REPLACE' then operand
+        when 'NULL' then nil
+        when 'PLUS' then current_value.present? ? current_value + operand : nil
+        when 'MINUS' then current_value.present? ? current_value - operand : nil
+        when 'TIMES' then current_value.present? ? current_value * operand : nil
+        when 'DIVISION' then current_value.present? ? current_value / operand : nil
         else
-          case calculation_info[:operator]
-          when 'PLUS' then current_value + operand
-          when 'MINUS' then current_value - operand
-          when 'TIMES' then current_value * operand
-          when 'DIVISION' then current_value / operand
-          else
-            current_value
-          end
+          current_value
         end
       else
         current_value
@@ -182,10 +191,11 @@ module ActiveScaffold::Actions
     def batch_update_value_for_date_picker(column, record, calculation_info)
       current_value = record.send(column.name)
       {"number"=>"", "unit"=>"DAYS", "value"=>"November 16, 2010", "operator"=>"REPLACE"}
-      if ActiveScaffold::Actions::BatchUpdate::DateOperators.include?(calculation_info[:operator])
+      if ActiveScaffold::Actions::BatchUpdate::GenericOperators.include?(calculation_info[:operator]) || ActiveScaffold::Actions::BatchUpdate::DateOperators.include?(calculation_info[:operator])
         operand = self.class.condition_value_for_datetime(calculation_info[:value], column.column.type == :date ? :to_date : :to_time)
         case calculation_info[:operator]
         when 'REPLACE' then operand
+        when 'NULL' then nil
         when 'PLUS' then
           trend_number = [calculation_info['number'].to_i,  1].max
           current_value.in((trend_number).send(calculation_info['unit'].downcase.singularize.to_sym))
