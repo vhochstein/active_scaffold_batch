@@ -40,7 +40,10 @@ module ActiveScaffold::Actions
       else
         @batch_successful = false
       end
-      do_list if batch_successful?
+      if batch_successful?
+        do_search if respond_to? :do_search
+        do_list
+      end
       respond_to_action(:batch_update)
     end
 
