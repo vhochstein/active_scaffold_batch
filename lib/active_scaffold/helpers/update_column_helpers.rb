@@ -53,6 +53,14 @@ module ActiveScaffold
       alias_method :active_scaffold_update_decimal, :active_scaffold_update_numeric
       alias_method :active_scaffold_update_float, :active_scaffold_update_numeric
 
+      def active_scaffold_update_scope_select
+        select_options = [[as_(:listed), 'LISTED']]
+        select_options << [as_(:marked), 'MARKED'] if active_scaffold_config.actions.include?(:mark)
+        select_tag("batch_update_scope",
+                   options_for_select(select_options, select_options.last[1]),
+                   :class => "text_input")
+      end
+
       ##
       ## Search column override signatures
       ##

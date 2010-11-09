@@ -64,6 +64,13 @@ module ActiveScaffold::Actions
       @selected_columns
     end
 
+    def batch_update_scope
+      if params[:batch_update_scope] && ['LISTED', 'MARKED'].include?(params[:batch_update_scope])
+        @batch_update_scope = params[:batch_update_scope]
+      end if @batch_update_scope.nil?
+      @batch_update_scope
+    end
+
     def batch_edit_respond_to_js
       render(:partial => 'batch_update_form')
     end
@@ -108,13 +115,20 @@ module ActiveScaffold::Actions
       update_columns = active_scaffold_config.batch_update.columns
       attribute_values = attribute_values_from_params(update_columns, params[:record])
 
-      active_scaffold_config.model.marked.each do |marked_record|
-        if marked_record.authorized_for?(:crud_type => :update)
-          update_record(marked_record, attribute_values)
-        else
-          @batch_successful = false
-          # some info that you are not authorized to update this record
-        end
+      case batch_update_scope
+      when 'LISTED' then
+        each_record_in_scope {|record| batch_update_record(record, attribute_values)}
+      when 'MARKED' then
+        active_scaffold_config.model.marked.each {|record| batch_update_record(record, attribute_values)}
+      end
+    end
+
+    def batch_update_record(record, attribute_values)
+      if record.authorized_for?(:crud_type => :update)
+        update_record(record, attribute_values)
+      else
+        @batch_successful = false
+        # some info that you are not authorized to update this record
       end
     end
 

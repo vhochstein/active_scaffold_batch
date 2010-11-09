@@ -1,5 +1,8 @@
 <% subsection_id ||= nil %>
 <ol class="form" <%= "id=#{subsection_id}" unless subsection_id.nil? %>  <%= 'style="display: none;"' if columns.collapsed -%>>
+  <li class="form-element">
+    <%= render :partial => 'batch_update_form_attribute_scope' -%>
+  </li>
   <% columns.each :for => @record do |column| %>
   <% next if column.plural_association? || (column.association && [:has_one].include?(column.association.macro)) %>
   <% renders_as = column_renders_as(column) %>
