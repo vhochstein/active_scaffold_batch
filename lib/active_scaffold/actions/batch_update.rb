@@ -114,13 +114,15 @@ module ActiveScaffold::Actions
     def do_batch_update
       update_columns = active_scaffold_config.batch_update.columns
       attribute_values = attribute_values_from_params(update_columns, params[:record])
+      send("batch_update_#{batch_update_scope.downcase}", attribute_values) if !batch_update_scope.nil? && respond_to?("batch_update_#{batch_update_scope.downcase}")
+    end
 
-      case batch_update_scope
-      when 'LISTED' then
-        each_record_in_scope {|record| batch_update_record(record, attribute_values)}
-      when 'MARKED' then
-        active_scaffold_config.model.marked.each {|record| batch_update_record(record, attribute_values)}
-      end
+    def batch_update_listed(attribute_values)
+      each_record_in_scope {|record| batch_update_record(record, attribute_values)}
+    end
+
+    def batch_update_marked(attribute_values)
+      active_scaffold_config.model.marked.each {|record| batch_update_record(record, attribute_values)}
     end
 
     def batch_update_record(record, attribute_values)
