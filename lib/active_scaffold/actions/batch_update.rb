@@ -142,7 +142,7 @@ module ActiveScaffold::Actions
       
       update_save
       if successful?
-        @record.marked = false
+        @record.marked = false if batch_update_scope == 'MARKED'
       else
         @batch_successful = false
         #copy errors from record and collect them
