@@ -3,6 +3,7 @@ module ActiveScaffold::Config
     self.crud_type = :update
     def initialize(*args)
       super
+      @process_mode = self.class.process_mode
     end
 
     # global level configuration
@@ -20,9 +21,19 @@ module ActiveScaffold::Config
     cattr_accessor :plugin_directory
     @@plugin_directory = File.expand_path(__FILE__).match(/vendor\/plugins\/([^\/]*)/)[1]
 
+    # configures how batch updates should be processed
+    # :update => standard activerecord update including validations
+    # :update_all => updating in one sql call without activerecord instantiation and validation
+    cattr_accessor :process_mode
+    @@process_mode = :update
+
 
     # instance-level configuration
     # ----------------------------
+
+    # see class accessor
+    attr_accessor :process_mode
+
 
     # the label= method already exists in the Form base class
     def label(model = nil)
