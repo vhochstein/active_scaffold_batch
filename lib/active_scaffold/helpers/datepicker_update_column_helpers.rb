@@ -2,7 +2,8 @@ module ActiveScaffold
   module Helpers
     module DatepickerUpdateColumnHelpers
       def active_scaffold_update_date_picker(column, options)
-        operator_options = active_scaffold_update_generic_operators(column) + ActiveScaffold::Actions::BatchUpdate::DateOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}
+        operator_options = active_scaffold_update_generic_operators(column)
+        operator_options.concat(ActiveScaffold::Actions::BatchUpdate::DateOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}) if active_scaffold_config.batch_update.process_mode == :update
         tags = []
         tags << select_tag("[record][#{column.name}][operator]",
                 options_for_select(operator_options, 'NO_UPDATE'),
