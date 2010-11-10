@@ -141,7 +141,10 @@ module ActiveScaffold::Actions
         active_scaffold_config.model.marked.each {|record| batch_update_record(record, attribute_values)}
       when :update_all then
         updates = updates_for_update_all(attribute_values)
-        active_scaffold_config.model.marked.update_all(updates) unless updates.first.empty?
+        unless updates.first.empty?
+          active_scaffold_config.model.marked.update_all(updates)
+          do_demark_all
+        end
       end
     end
 
