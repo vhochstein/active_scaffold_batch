@@ -261,7 +261,7 @@ module ActiveScaffold::Actions
       if ActiveScaffold::Actions::BatchUpdate::GenericOperators.include?(calculation_info[:operator]) || ActiveScaffold::Actions::BatchUpdate::NumericOperators.include?(calculation_info[:operator])
         operand =  active_scaffold_config.model.quote_value(self.class.condition_value_for_numeric(column, calculation_info[:value]))
         if calculation_info[:opt] == 'PERCENT'#
-          operand = "#{active_scaffold_config.model.connection.quote_column_name(column.name)} / 100 * #{operand}"
+          operand = "#{active_scaffold_config.model.connection.quote_column_name(column.name)} / 100.0 * #{operand}"
         end
         case calculation_info[:operator]
         when 'REPLACE' then operand
