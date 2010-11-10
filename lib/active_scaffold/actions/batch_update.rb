@@ -74,6 +74,10 @@ module ActiveScaffold::Actions
       @batch_update_scope
     end
 
+    def error_records
+      @error_records ||= []
+    end
+
     def batch_edit_respond_to_js
       render(:partial => 'batch_update_form')
     end
@@ -183,7 +187,7 @@ module ActiveScaffold::Actions
         @record.marked = false if batch_update_scope == 'MARKED'
       else
         @batch_successful = false
-        #copy errors from record and collect them
+        error_records << @record
       end
     end
 
@@ -218,7 +222,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_successful?
-      @batch_successful = true if @batch_successful.nil?
+      @batch_successful = error_records.empty? if @batch_successful.nil?
       @batch_successful
     end
 
