@@ -29,8 +29,10 @@ module ActiveScaffold
       end
 
       def active_scaffold_update_generic_operators_select(column, options)
+        current = {:operator => 'NO_UPDATE'}
+        current.merge!(batch_update_values[column.name][:value].symbolize_keys) if batch_update_values[column.name] && batch_update_values[column.name][:value]
         select_tag("[record][#{column.name}][operator]",
-              options_for_select(active_scaffold_update_generic_operators(column), 'NO_UPDATE'),
+              options_for_select(active_scaffold_update_generic_operators(column), current[:operator]),
               :id => "#{options[:id]}_operator",
               :class => "as_batch_update_operator text_input")
       end
