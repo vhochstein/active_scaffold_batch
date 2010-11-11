@@ -129,6 +129,18 @@ module ActiveScaffold::Actions
       update_columns = active_scaffold_config.batch_update.columns
       @batch_update_values = attribute_values_from_params(update_columns, params[:record])
       send("batch_update_#{batch_update_scope.downcase}") if !batch_update_scope.nil? && respond_to?("batch_update_#{batch_update_scope.downcase}")
+      prepare_error_record unless batch_successful?
+    end
+
+    # in case of an error we have to prepare @record object to have assigned all
+    # defined batch_update values, however, do not set those ones with an override
+    # these ones will manage on their own
+    def prepare_error_record
+      do_new
+      batch_update_values.each do |attribute, value|
+        form_ui = colunm_form_ui(value[:column])
+        set_record_attribute(value[:column], attribute, value[:value]) unless form_ui && override_batch_update_value?(form_ui)
+      end
     end
 
     def batch_update_listed
@@ -199,13 +211,17 @@ module ActiveScaffold::Actions
     end
 
     def set_record_attribute(column, attribute, value)
-      form_ui = column.form_ui
-      form_ui = column.column.type if form_ui.nil? && column.column
+      form_ui = colunm_form_ui(column)
       if form_ui && override_batch_update_value?(form_ui)
         @record.send("#{attribute}=", send(override_batch_update_value(form_ui), column, @record, value))
       else
         @record.send("#{attribute}=", value[:operator] == 'NULL' ? nil : value[:value])
       end
+    end
+
+    def colunm_form_ui(column)
+      form_ui = column.form_ui
+      form_ui = column.column.type if form_ui.nil? && column.column
     end
 
     def get_update_all_attribute(column, attribute, value)
