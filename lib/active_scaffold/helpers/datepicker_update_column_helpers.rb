@@ -6,6 +6,7 @@ module ActiveScaffold
         current_params.merge!(batch_update_values[column.name][:value].symbolize_keys) if batch_update_values[column.name] && batch_update_values[column.name][:value]
         operator_options = active_scaffold_update_generic_operators(column)
         operator_options.concat(ActiveScaffold::Actions::BatchUpdate::DateOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}) if active_scaffold_config.batch_update.process_mode == :update
+        options = options.merge(:show => ['PLUS', 'MINUS'].exclude?(current_params[:operator]))
         tags = []
         tags << select_tag("[record][#{column.name}][operator]",
                 options_for_select(operator_options, current_params[:operator]),

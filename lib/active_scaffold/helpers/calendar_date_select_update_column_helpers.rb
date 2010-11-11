@@ -10,6 +10,7 @@ module ActiveScaffold
         Rails.logger.info("update_date2 column: #{column.name}: #{current_params[:value].inspect}, class: #{current_params[:value].class}")
         operator_options = active_scaffold_update_generic_operators(column)
         operator_options.concat(ActiveScaffold::Actions::BatchUpdate::DateOperators.collect {|comp| [as_(comp.downcase.to_sym), comp]}) if active_scaffold_config.batch_update.process_mode == :update
+        options = options.merge(:show => ['PLUS', 'MINUS'].exclude?(current_params[:operator]))
         tags = []
         tags << select_tag("[record][#{column.name}][operator]",
                 options_for_select(operator_options, current_params[:operator]),
