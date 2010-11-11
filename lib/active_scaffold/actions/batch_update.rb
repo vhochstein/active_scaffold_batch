@@ -27,6 +27,7 @@ module ActiveScaffold::Actions
                   :only => :batch_update,
                   :redirect_to => { :action => :index }
       base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchUpdate.plugin_directory, 'frontends', 'default' , 'views')
+      base.helper_method :batch_update_scope
     end
 
     def batch_edit
@@ -68,8 +69,9 @@ module ActiveScaffold::Actions
     end
 
     def batch_update_scope
-      if params[:batch_update_scope] && ['LISTED', 'MARKED'].include?(params[:batch_update_scope])
-        @batch_update_scope = params[:batch_update_scope]
+      if params[:batch_update_scope] 
+        @batch_update_scope = params[:batch_update_scope] if ['LISTED', 'MARKED'].include?(params[:batch_update_scope])
+        params.delete :batch_update_scope
       end if @batch_update_scope.nil?
       @batch_update_scope
     end
