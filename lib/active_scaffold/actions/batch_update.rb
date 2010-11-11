@@ -28,6 +28,7 @@ module ActiveScaffold::Actions
                   :redirect_to => { :action => :index }
       base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchUpdate.plugin_directory, 'frontends', 'default' , 'views')
       base.helper_method :batch_update_scope
+      base.helper_method :batch_update_values
     end
 
     def batch_edit
@@ -80,6 +81,10 @@ module ActiveScaffold::Actions
       @error_records ||= []
     end
 
+    def batch_update_values
+      @batch_update_values || {}
+    end
+
     def batch_edit_respond_to_js
       render(:partial => 'batch_update_form')
     end
@@ -122,16 +127,16 @@ module ActiveScaffold::Actions
 
     def do_batch_update
       update_columns = active_scaffold_config.batch_update.columns
-      attribute_values = attribute_values_from_params(update_columns, params[:record])
-      send("batch_update_#{batch_update_scope.downcase}", attribute_values) if !batch_update_scope.nil? && respond_to?("batch_update_#{batch_update_scope.downcase}")
+      @batch_update_values = attribute_values_from_params(update_columns, params[:record])
+      send("batch_update_#{batch_update_scope.downcase}") if !batch_update_scope.nil? && respond_to?("batch_update_#{batch_update_scope.downcase}")
     end
 
-    def batch_update_listed(attribute_values)
+    def batch_update_listed
       case active_scaffold_config.batch_update.process_mode
       when :update then
-        each_record_in_scope {|record| batch_update_record(record, attribute_values)}
+        each_record_in_scope {|record| batch_update_record(record)}
       when :update_all then
-        updates = updates_for_update_all(attribute_values)
+        updates = updates_for_update_all
         unless updates.first.empty?
           do_search if respond_to? :do_search
           # all_conditions might fail cause joins are not working in update_all
@@ -141,12 +146,12 @@ module ActiveScaffold::Actions
       
     end
 
-    def batch_update_marked(attribute_values)
+    def batch_update_marked
       case active_scaffold_config.batch_update.process_mode
       when :update then
-        active_scaffold_config.model.marked.each {|record| batch_update_record(record, attribute_values)}
+        active_scaffold_config.model.marked.each {|record| batch_update_record(record)}
       when :update_all then
-        updates = updates_for_update_all(attribute_values)
+        updates = updates_for_update_all
         unless updates.first.empty?
           active_scaffold_config.model.marked.update_all(updates)
           do_demark_all
@@ -154,9 +159,9 @@ module ActiveScaffold::Actions
       end
     end
 
-    def updates_for_update_all(attribute_values)
+    def updates_for_update_all()
       update_all = [[]]
-      attribute_values.each do |attribute, value|
+      batch_update_values.each do |attribute, value|
         sql_set, value = get_update_all_attribute(value[:column], attribute, value[:value])
         unless sql_set.nil?
           update_all.first << sql_set
@@ -167,20 +172,20 @@ module ActiveScaffold::Actions
       update_all
     end
 
-    def batch_update_record(record, attribute_values)
+    def batch_update_record(record)
       if record.authorized_for?(:crud_type => :update)
-        update_record(record, attribute_values)
+        update_record(record)
       else
         @batch_successful = false
         # some info that you are not authorized to update this record
       end
     end
 
-    def update_record(record, attribute_values)
+    def update_record(record)
       @successful = nil
       @record = record
 
-      attribute_values.each do |attribute, value|
+      batch_update_values.each do |attribute, value|
         set_record_attribute(value[:column], attribute, value[:value])
       end
       
