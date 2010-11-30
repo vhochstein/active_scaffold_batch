@@ -4,6 +4,7 @@ module ActiveScaffold::Config
     def initialize(*args)
       super
       @process_mode = self.class.process_mode
+      @action_group ||= 'collection.batch'
     end
 
     # global level configuration
@@ -15,7 +16,7 @@ module ActiveScaffold::Config
     def self.link=(val)
       @@link = val
     end
-    @@link = ActiveScaffold::DataStructures::ActionLink.new('batch_edit', :label => :batch_edit, :type => :collection, :security_method => :batch_update_authorized?)
+    @@link = ActiveScaffold::DataStructures::ActionLink.new('batch_edit', :label => :edit, :type => :collection, :security_method => :batch_update_authorized?)
 
     # configures where the plugin itself is located. there is no instance version of this.
     cattr_accessor :plugin_directory

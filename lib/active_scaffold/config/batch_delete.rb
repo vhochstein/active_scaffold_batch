@@ -2,8 +2,13 @@ module ActiveScaffold::Config
   class BatchDelete < ActiveScaffold::Config::Base
     self.crud_type = :delete
     
-    def initialize(*args)
-      super
+    def initialize(core_config)
+      @core = core_config
+
+      # start with the ActionLink defined globally
+      @link = self.class.link
+      @action_group = self.class.action_group.clone if self.class.action_group
+      @action_group ||= 'collection.batch.destroy'
       @process_mode = self.class.process_mode
     end
 
@@ -16,7 +21,8 @@ module ActiveScaffold::Config
     def self.link=(val)
       @@link = val
     end
-    @@link = ActiveScaffold::DataStructures::ActionLink.new('batch_delete', :label => :batch_delete, :type => :collection, :security_method => :batch_delete_authorized?)
+    @@link = [ ActiveScaffold::DataStructures::ActionLink.new('batch_delete', :label => :listed, :type => :collection, :parameters => {:batch_delete_scope => 'LISTED'},:security_method => :batch_delete_authorized?),
+               ActiveScaffold::DataStructures::ActionLink.new('batch_delete', :label => :marked, :type => :collection, :parameters => {:batch_delete_scope => 'MARKED'}, :security_method => :batch_delete_authorized?)]
 
     # configures where the plugin itself is located. there is no instance version of this.
     cattr_accessor :plugin_directory
@@ -35,11 +41,14 @@ module ActiveScaffold::Config
     # see class accessor
     attr_accessor :process_mode
 
+    # the ActionLink for this action
+    attr_accessor :link
 
     # the label= method already exists in the Form base class
     def label(model = nil)
       model ||= @core.label(:count => 2)
       @label ? as_(@label) : as_(:deleted_model, :model => model)
     end
+
   end
 end
