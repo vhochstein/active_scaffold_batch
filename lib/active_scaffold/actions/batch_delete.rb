@@ -6,7 +6,7 @@ module ActiveScaffold::Actions
       base.verify :method => [:post, :put],
                   :only => :batch_destroy,
                   :redirect_to => { :action => :index }
-      base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchUpdate.plugin_directory, 'frontends', 'default' , 'views')
+      base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchDelete.plugin_directory, 'frontends', 'default' , 'views')
       base.helper_method :batch_delete_scope
     end
 
@@ -17,7 +17,6 @@ module ActiveScaffold::Actions
 
     def batch_destroy
       return redirect_to(params.merge(:action => :batch_delete)) if request.get?
-
       do_batch_destroy
       if batch_successful?
         do_search if respond_to? :do_search
@@ -52,7 +51,7 @@ module ActiveScaffold::Actions
         end
       else # just a regular post
         if batch_successful?
-          flash[:info] = as_(:deleted_model, :model => @record.to_label)
+          flash[:info] = 'Records deleted'
         end
         return_to_main
       end
@@ -79,7 +78,7 @@ module ActiveScaffold::Actions
     end
 
     def do_batch_destroy
-      send("batch_destroy_#{batch_update_scope.downcase}") if !batch_update_scope.nil? && respond_to?("batch_update_#{batch_update_scope.downcase}")
+      send("batch_destroy_#{batch_delete_scope.downcase}") if !batch_delete_scope.nil? && respond_to?("batch_update_#{batch_delete_scope.downcase}")
       prepare_error_record unless batch_successful?
     end
 
@@ -147,7 +146,7 @@ module ActiveScaffold::Actions
 
     def batch_delete_authorized_filter
       link = active_scaffold_config.batch_delete.link || active_scaffold_config.batch_delete.class.link
-      raise ActiveScaffold::ActionNotAllowed unless self.send(link.security_method)
+      raise ActiveScaffold::ActionNotAllowed unless self.send(link.first.security_method)
     end
     def batch_delete_formats
       (default_formats + active_scaffold_config.formats).uniq
