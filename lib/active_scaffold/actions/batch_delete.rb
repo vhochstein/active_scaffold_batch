@@ -2,29 +2,20 @@ module ActiveScaffold::Actions
   module BatchDelete
 
     def self.included(base)
-      base.before_filter :batch_delete_authorized_filter, :only => [:batch_delete, :batch_destroy]
-      base.verify :method => [:post, :put],
-                  :only => :batch_destroy,
-                  :redirect_to => { :action => :index }
+      base.before_filter :batch_delete_authorized_filter, :only => [:batch_destroy]
       base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchDelete.plugin_directory, 'frontends', 'default' , 'views')
       base.helper_method :batch_delete_scope
     end
 
-    def batch_delete
-      do_batch_delete
-      render :action => 'batch_delete'
-    end
-
     def batch_destroy
-      return redirect_to(params.merge(:action => :batch_delete)) if request.get?
-      do_batch_destroy
-      if batch_successful?
-        do_search if respond_to? :do_search
-        do_list
+      process_action_link_action(:batch_destroy) do
+        do_batch_destroy
+        if batch_successful?
+          do_search if respond_to? :do_search
+          do_list
+        end
       end
-      respond_to_action(:batch_destroy)
     end
-
     
     protected
     def batch_delete_scope
@@ -39,10 +30,6 @@ module ActiveScaffold::Actions
       @error_records ||= []
     end
 
-
-    def batch_destroy_respond_to_js
-      render(:partial => 'on_batch_destroy')
-    end
 
     def batch_destroy_respond_to_html
       if params[:iframe]=='true' # was this an iframe post ?
@@ -71,10 +58,6 @@ module ActiveScaffold::Actions
 
     def batch_destroy_respond_to_yaml
       render :text => Hash.from_xml(response_object.to_xml(:only => active_scaffold_config.batch_delete.columns.names)).to_yaml, :content_type => Mime::YAML, :status => response_status
-    end
-
-    def do_batch_delete
-      self.successful = true
     end
 
     def do_batch_destroy
@@ -148,9 +131,7 @@ module ActiveScaffold::Actions
       link = active_scaffold_config.batch_delete.link || active_scaffold_config.batch_delete.class.link
       raise ActiveScaffold::ActionNotAllowed unless self.send(link.first.security_method)
     end
-    def batch_delete_formats
-      (default_formats + active_scaffold_config.formats).uniq
-    end
+
     def batch_destroy_formats
       (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_delete.formats).uniq
     end
