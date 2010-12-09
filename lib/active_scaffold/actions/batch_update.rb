@@ -26,8 +26,6 @@ module ActiveScaffold::Actions
       base.verify :method => [:post, :put],
                   :only => :batch_update,
                   :redirect_to => { :action => :index }
-      base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchUpdate.plugin_directory, 'frontends', 'default' , 'views')
-      base.helper_method :batch_update_scope
       base.helper_method :batch_update_values
     end
 
@@ -67,14 +65,6 @@ module ActiveScaffold::Actions
         end
       end if @selected_columns.nil?
       @selected_columns
-    end
-
-    def batch_update_scope
-      if params[:batch_update_scope] 
-        @batch_update_scope = params[:batch_update_scope] if ['LISTED', 'MARKED'].include?(params[:batch_update_scope])
-        params.delete :batch_update_scope
-      end if @batch_update_scope.nil?
-      @batch_update_scope
     end
 
     def error_records
@@ -128,7 +118,7 @@ module ActiveScaffold::Actions
     def do_batch_update
       update_columns = active_scaffold_config.batch_update.columns
       @batch_update_values = attribute_values_from_params(update_columns, params[:record])
-      send("batch_update_#{batch_update_scope.downcase}") if !batch_update_scope.nil? && respond_to?("batch_update_#{batch_update_scope.downcase}")
+      send("batch_update_#{batch_scope.downcase}") if !batch_scope.nil? && respond_to?("batch_update_#{batch_scope.downcase}")
       prepare_error_record unless batch_successful?
     end
 
@@ -203,7 +193,7 @@ module ActiveScaffold::Actions
       
       update_save
       if successful?
-        @record.marked = false if batch_update_scope == 'MARKED'
+        @record.marked = false if batch_scope == 'MARKED'
       else
         @batch_successful = false
         error_records << @record

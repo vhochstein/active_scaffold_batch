@@ -60,8 +60,8 @@ module ActiveScaffold
       def active_scaffold_update_scope_select
         select_options = [[as_(:listed), 'LISTED']]
         select_options << [as_(:marked), 'MARKED'] if active_scaffold_config.actions.include?(:mark)
-        select_tag("batch_update_scope",
-                   options_for_select(select_options, batch_update_scope || select_options.last[1]),
+        select_tag("batch_scope",
+                   options_for_select(select_options, batch_scope || select_options.last[1]),
                    :class => "text_input")
       end
 

@@ -1,29 +1,21 @@
 module ActiveScaffold::Actions
-  module BatchDelete
+  module BatchBase
 
     def self.included(base)
-      base.before_filter :batch_delete_authorized_filter, :only => [:batch_destroy]
+      base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchBase.plugin_directory, 'frontends', 'default' , 'views')
+      base.helper_method :batch_scope
     end
 
-    def batch_destroy
-      process_action_link_action(:batch_destroy) do
-        do_batch_destroy
-        if batch_successful?
-          do_search if respond_to? :do_search
-          do_list
-        end
-      end
-    end
-    
     protected
-    def batch_delete_scope
-      if params[:batch_delete_scope]
-        @batch_delete_scope = params[:batch_delete_scope] if ['LISTED', 'MARKED'].include?(params[:batch_delete_scope])
-        params.delete :batch_delete_scope
-      end if @batch_delete_scope.nil?
-      @batch_delete_scope
+    def batch_scope
+      if params[:batch_scope]
+        @batch_scope = params[:batch_scope] if ['LISTED', 'MARKED'].include?(params[:batch_scope])
+        params.delete :batch_scope
+      end if @batch_scope.nil?
+      @batch_scope
     end
 
+=begin
     def error_records
       @error_records ||= []
     end
@@ -59,7 +51,7 @@ module ActiveScaffold::Actions
     end
 
     def do_batch_destroy
-      send("batch_destroy_#{batch_scope.downcase}") if !batch_scope.nil? && respond_to?("batch_destroy_#{batch_scope.downcase}")
+      send("batch_destroy_#{batch_delete_scope.downcase}") if !batch_delete_scope.nil? && respond_to?("batch_update_#{batch_delete_scope.downcase}")
       prepare_error_record unless batch_successful?
     end
 
@@ -133,5 +125,6 @@ module ActiveScaffold::Actions
     def batch_destroy_formats
       (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_delete.formats).uniq
     end
+=end
   end
 end

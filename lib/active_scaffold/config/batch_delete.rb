@@ -21,8 +21,8 @@ module ActiveScaffold::Config
     def self.link=(val)
       @@link = val
     end
-    @@link = [ ActiveScaffold::DataStructures::ActionLink.new('batch_destroy', :label => :listed, :type => :collection, :method => :delete, :position => false, :crud_type => :delete, :confirm => :are_you_sure_to_delete, :parameters => {:batch_delete_scope => 'LISTED'},:security_method => :batch_delete_authorized?),
-               ActiveScaffold::DataStructures::ActionLink.new('batch_destroy', :label => :marked, :type => :collection, :method => :delete, :position => false, :crud_type => :delete, :confirm => :are_you_sure_to_delete, :parameters => {:batch_delete_scope => 'MARKED'}, :security_method => :batch_delete_authorized?)]
+    @@link = [ ActiveScaffold::DataStructures::ActionLink.new('batch_destroy', :label => :listed, :type => :collection, :method => :delete, :position => false, :crud_type => :delete, :confirm => :are_you_sure_to_delete, :parameters => {:batch_scope => 'LISTED'},:security_method => :batch_delete_authorized?),
+               ActiveScaffold::DataStructures::ActionLink.new('batch_destroy', :label => :marked, :type => :collection, :method => :delete, :position => false, :crud_type => :delete, :confirm => :are_you_sure_to_delete, :parameters => {:batch_scope => 'MARKED'}, :security_method => :batch_delete_authorized?)]
 
     # configures where the plugin itself is located. there is no instance version of this.
     cattr_accessor :plugin_directory
