@@ -35,15 +35,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_update
-      if !selected_columns.nil?
-        do_batch_update
-      else
-        @batch_successful = false
-      end
-      if batch_successful?
-        do_search if respond_to? :do_search
-        do_list
-      end
+      process_batch
       respond_to_action(:batch_update)
     end
 
@@ -58,19 +50,18 @@ module ActiveScaffold::Actions
     end
 
     def selected_columns
-      if params[:record] && params[:record].is_a?(Hash)
+      if @selected_columns.nil?
         @selected_columns = []
-        params[:record].each do |key, value|
-          @selected_columns << key.to_sym if value[:operator] != 'NO_UPDATE'
+        if params[:record] && params[:record].is_a?(Hash)
+          params[:record].each do |key, value|
+            @selected_columns << key.to_sym if value[:operator] != 'NO_UPDATE'
+          end
         end
-      end if @selected_columns.nil?
+      end
       @selected_columns
     end
 
-    def error_records
-      @error_records ||= []
-    end
-
+    
     def batch_update_values
       @batch_update_values || {}
     end
@@ -115,11 +106,9 @@ module ActiveScaffold::Actions
       do_new
     end
 
-    def do_batch_update
+    def before_do_batch_update
       update_columns = active_scaffold_config.batch_update.columns
       @batch_update_values = attribute_values_from_params(update_columns, params[:record])
-      send("batch_update_#{batch_scope.downcase}") if !batch_scope.nil? && respond_to?("batch_update_#{batch_scope.downcase}")
-      prepare_error_record unless batch_successful?
     end
 
     # in case of an error we have to prepare @record object to have assigned all
@@ -232,11 +221,6 @@ module ActiveScaffold::Actions
       end
       
       return sql_set, update_value
-    end
-
-    def batch_successful?
-      @batch_successful = error_records.empty? if @batch_successful.nil?
-      @batch_successful
     end
 
     def attribute_values_from_params(columns, attributes)

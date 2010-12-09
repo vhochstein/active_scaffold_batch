@@ -6,29 +6,10 @@ module ActiveScaffold::Actions
     end
 
     def batch_destroy
-      process_action_link_action(:batch_destroy) do
-        do_batch_destroy
-        if batch_successful?
-          do_search if respond_to? :do_search
-          do_list
-        end
-      end
+      batch_action
     end
     
     protected
-    def batch_delete_scope
-      if params[:batch_delete_scope]
-        @batch_delete_scope = params[:batch_delete_scope] if ['LISTED', 'MARKED'].include?(params[:batch_delete_scope])
-        params.delete :batch_delete_scope
-      end if @batch_delete_scope.nil?
-      @batch_delete_scope
-    end
-
-    def error_records
-      @error_records ||= []
-    end
-
-
     def batch_destroy_respond_to_html
       if params[:iframe]=='true' # was this an iframe post ?
         responds_to_parent do
@@ -56,17 +37,6 @@ module ActiveScaffold::Actions
 
     def batch_destroy_respond_to_yaml
       render :text => Hash.from_xml(response_object.to_xml(:only => active_scaffold_config.batch_delete.columns.names)).to_yaml, :content_type => Mime::YAML, :status => response_status
-    end
-
-    def do_batch_destroy
-      send("batch_destroy_#{batch_scope.downcase}") if !batch_scope.nil? && respond_to?("batch_destroy_#{batch_scope.downcase}")
-      prepare_error_record unless batch_successful?
-    end
-
-    # in case of an error we have to prepare @record object to have assigned all
-    # defined batch_update values, however, do not set those ones with an override
-    # these ones will manage on their own
-    def prepare_error_record
     end
 
     def batch_destroy_listed
@@ -105,17 +75,14 @@ module ActiveScaffold::Actions
 
       do_destroy
       if successful?
-        @record.marked = false if batch_delete_scope == 'MARKED'
+        @record.marked = false if batch_scope == 'MARKED'
       else
         @batch_successful = false
         error_records << @record
       end
     end
 
-    def batch_successful?
-      @batch_successful = error_records.empty? if @batch_successful.nil?
-      @batch_successful
-    end
+    
 
     # The default security delegates to ActiveRecordPermissions.
     # You may override the method to customize.
