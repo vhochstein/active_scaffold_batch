@@ -35,8 +35,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_update
-      process_batch
-      respond_to_action(:batch_update)
+      batch_action
     end
 
     
@@ -47,6 +46,10 @@ module ActiveScaffold::Actions
       else
         return_to_main
       end
+    end
+
+    def batch_edit_respond_to_js
+      render(:partial => 'batch_update_form')
     end
 
     def selected_columns
@@ -66,10 +69,6 @@ module ActiveScaffold::Actions
       @batch_update_values || {}
     end
 
-    def batch_edit_respond_to_js
-      render(:partial => 'batch_update_form')
-    end
-
     def batch_update_respond_to_html
       if params[:iframe]=='true' # was this an iframe post ?
         responds_to_parent do
@@ -87,18 +86,6 @@ module ActiveScaffold::Actions
 
     def batch_update_respond_to_js
       render :action => 'on_batch_update'
-    end
-
-    def batch_update_respond_to_xml
-      render :xml => response_object.to_xml(:only => active_scaffold_config.batch_update.columns.names), :content_type => Mime::XML, :status => response_status
-    end
-
-    def batch_update_respond_to_json
-      render :text => response_object.to_json(:only => active_scaffold_config.batch_update.columns.names), :content_type => Mime::JSON, :status => response_status
-    end
-
-    def batch_update_respond_to_yaml
-      render :text => Hash.from_xml(response_object.to_xml(:only => active_scaffold_config.batch_update.columns.names)).to_yaml, :content_type => Mime::YAML, :status => response_status
     end
 
     def do_batch_edit
@@ -334,9 +321,6 @@ module ActiveScaffold::Actions
     end
     def batch_edit_formats
       (default_formats + active_scaffold_config.formats).uniq
-    end
-    def batch_update_formats
-      (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_update.formats).uniq
     end
   end
 end

@@ -10,34 +10,6 @@ module ActiveScaffold::Actions
     end
     
     protected
-    def batch_destroy_respond_to_html
-      if params[:iframe]=='true' # was this an iframe post ?
-        responds_to_parent do
-          render :action => 'on_batch_destroy.js', :layout => false
-        end
-      else # just a regular post
-        if batch_successful?
-          flash[:info] = 'Records deleted'
-        end
-        return_to_main
-      end
-    end
-
-    def batch_destroy_respond_to_js
-      render :action => 'on_batch_destroy'
-    end
-
-    def batch_destroy_respond_to_xml
-      render :xml => response_object.to_xml(:only => active_scaffold_config.batch_delete.columns.names), :content_type => Mime::XML, :status => response_status
-    end
-
-    def batch_destroy_respond_to_json
-      render :text => response_object.to_json(:only => active_scaffold_config.batch_delete.columns.names), :content_type => Mime::JSON, :status => response_status
-    end
-
-    def batch_destroy_respond_to_yaml
-      render :text => Hash.from_xml(response_object.to_xml(:only => active_scaffold_config.batch_delete.columns.names)).to_yaml, :content_type => Mime::YAML, :status => response_status
-    end
 
     def batch_destroy_listed
       case active_scaffold_config.batch_delete.process_mode
@@ -82,12 +54,14 @@ module ActiveScaffold::Actions
       end
     end
 
-    
-
     # The default security delegates to ActiveRecordPermissions.
     # You may override the method to customize.
     def batch_delete_authorized?(record = nil)
       authorized_for?(:crud_type => :delete)
+    end
+
+    def batch_destroy_formats
+      (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_delete.formats).uniq
     end
 
     private
@@ -95,10 +69,6 @@ module ActiveScaffold::Actions
     def batch_delete_authorized_filter
       link = active_scaffold_config.batch_delete.link || active_scaffold_config.batch_delete.class.link
       raise ActiveScaffold::ActionNotAllowed unless self.send(link.first.security_method)
-    end
-
-    def batch_destroy_formats
-      (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_delete.formats).uniq
     end
   end
 end
