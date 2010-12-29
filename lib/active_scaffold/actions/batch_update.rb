@@ -155,7 +155,8 @@ module ActiveScaffold::Actions
         update_record(record)
       else
         @batch_successful = false
-        # some info that you are not authorized to update this record
+        record.errors.add(:base, as_(:no_authorization_for_action, :action => action_name))
+        error_records << record
       end
     end
 
