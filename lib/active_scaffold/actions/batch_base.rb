@@ -16,10 +16,8 @@ module ActiveScaffold::Actions
 
     def process_batch
       do_batch
-      if batch_successful?
-        do_search if respond_to? :do_search
-        do_list
-      end  
+      do_search if respond_to? :do_search
+      do_list
     end
 
     def batch_scope

@@ -37,7 +37,8 @@ module ActiveScaffold::Actions
         destroy_record(record)
       else
         @batch_successful = false
-        # some info that you are not authorized to update this record
+        record.errors.add(:base, as_(:no_authorization_for_action, :action => action_name))
+        error_records << record
       end
     end
 
@@ -58,10 +59,6 @@ module ActiveScaffold::Actions
     # You may override the method to customize.
     def batch_destroy_authorized?(record = nil)
       authorized_for?(:crud_type => :delete)
-    end
-
-    def batch_destroy_formats
-      (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_destroy.formats).uniq
     end
 
     private
