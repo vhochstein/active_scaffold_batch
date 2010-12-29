@@ -1,8 +1,8 @@
 module ActiveScaffold::Actions
-  module BatchDelete
+  module BatchDestroy
 
     def self.included(base)
-      base.before_filter :batch_delete_authorized_filter, :only => [:batch_destroy]
+      base.before_filter :batch_destroy_authorized_filter, :only => [:batch_destroy]
     end
 
     def batch_destroy
@@ -12,7 +12,7 @@ module ActiveScaffold::Actions
     protected
 
     def batch_destroy_listed
-      case active_scaffold_config.batch_delete.process_mode
+      case active_scaffold_config.batch_destroy.process_mode
       when :delete then
         each_record_in_scope {|record| batch_destroy_record(record)}
       when :delete_all then
@@ -23,7 +23,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_destroy_marked
-      case active_scaffold_config.batch_delete.process_mode
+      case active_scaffold_config.batch_destroy.process_mode
       when :delete then
         active_scaffold_config.model.marked.each {|record| batch_destroy_record(record)}
       when :delete_all then
@@ -56,18 +56,18 @@ module ActiveScaffold::Actions
 
     # The default security delegates to ActiveRecordPermissions.
     # You may override the method to customize.
-    def batch_delete_authorized?(record = nil)
+    def batch_destroy_authorized?(record = nil)
       authorized_for?(:crud_type => :delete)
     end
 
     def batch_destroy_formats
-      (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_delete.formats).uniq
+      (default_formats + active_scaffold_config.formats + active_scaffold_config.batch_destroy.formats).uniq
     end
 
     private
 
-    def batch_delete_authorized_filter
-      link = active_scaffold_config.batch_delete.link || active_scaffold_config.batch_delete.class.link
+    def batch_destroy_authorized_filter
+      link = active_scaffold_config.batch_destroy.link || active_scaffold_config.batch_destroy.class.link
       raise ActiveScaffold::ActionNotAllowed unless self.send(link.first.security_method)
     end
   end
