@@ -1,5 +1,6 @@
-@error_records.each do |record|
-  flash[:error] = active_scaffold_error_messages_for record, :object_name => "#{record.class.model_name.human.downcase}#{record.new_record? ? '' : ": #{record.to_label}"}"
+unless @error_records.empty?
+  flash[:error] = @error_records.collect do |record|
+    active_scaffold_error_messages_for(record, :object_name => "#{record.class.model_name.human.downcase}#{record.new_record? ? '' : ": #{record.to_label}"}", :header_message => '', :message => "#{record.class.model_name.human.downcase}#{record.new_record? ? '' : ": #{record.to_label}"}", :container_tag => nil, :list_type => :br)
+  end.join.html_safe
 end
-
 page.call 'ActiveScaffold.replace_html', active_scaffold_content_id, render(:partial => 'list', :layout => false)
