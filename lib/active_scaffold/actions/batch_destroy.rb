@@ -14,7 +14,9 @@ module ActiveScaffold::Actions
     def batch_destroy_listed
       case active_scaffold_config.batch_destroy.process_mode
       when :delete then
-        each_record_in_scope {|record| batch_destroy_record(record)}
+        each_record_in_scope do |record|
+          destroy_record(record) if authorized_for_job?(record)
+        end
       when :delete_all then
         do_search if respond_to? :do_search
         active_scaffold_config.model.delete_all(all_conditions)
@@ -25,19 +27,12 @@ module ActiveScaffold::Actions
     def batch_destroy_marked
       case active_scaffold_config.batch_destroy.process_mode
       when :delete then
-        active_scaffold_config.model.marked.each {|record| batch_destroy_record(record)}
+        active_scaffold_config.model.marked.each do |record|
+          destroy_record(record) if authorized_for_job?(record)
+        end
       when :delete_all then
         active_scaffold_config.model.marked.delete_all
         do_demark_all
-      end
-    end
-
-    def batch_destroy_record(record)
-      if record.authorized_for?(:crud_type => :delete)
-        destroy_record(record)
-      else
-        record.errors.add(:base, as_(:no_authorization_for_action, :action => action_name))
-        error_records << record
       end
     end
 

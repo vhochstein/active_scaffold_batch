@@ -112,7 +112,7 @@ module ActiveScaffold::Actions
     def batch_update_listed
       case active_scaffold_config.batch_update.process_mode
       when :update then
-        each_record_in_scope {|record| batch_update_record(record)}
+        each_record_in_scope {|record| update_record(record) if authorized_for_job?(record)}
       when :update_all then
         updates = updates_for_update_all
         unless updates.first.empty?
@@ -127,7 +127,7 @@ module ActiveScaffold::Actions
     def batch_update_marked
       case active_scaffold_config.batch_update.process_mode
       when :update then
-        active_scaffold_config.model.marked.each {|record| batch_update_record(record)}
+        active_scaffold_config.model.marked.each {|record| update_record(record) if authorized_for_job?(record)}
       when :update_all then
         updates = updates_for_update_all
         unless updates.first.empty?
@@ -148,15 +148,6 @@ module ActiveScaffold::Actions
       end
       update_all[0] = update_all.first.join(',')
       update_all
-    end
-
-    def batch_update_record(record)
-      if record.authorized_for?(:crud_type => :update)
-        update_record(record)
-      else
-        record.errors.add(:base, as_(:no_authorization_for_action, :action => action_name))
-        error_records << record
-      end
     end
 
     def update_record(record)

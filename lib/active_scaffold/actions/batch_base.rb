@@ -48,6 +48,16 @@ module ActiveScaffold::Actions
       prepare_error_record unless batch_successful?
     end
 
+    def authorized_for_job?(record)
+      if record.authorized_for?(:crud_type => active_scaffold_config.send(action_name).crud_type)
+        true
+      else
+        record.errors.add(:base, as_(:no_authorization_for_action, :action => action_name))
+        error_records << record
+        false
+      end
+    end
+
     def batch_base_respond_to_html
       if respond_to? "#{action_name}_respond_to_html"
         send("#{action_name}_respond_to_html")
