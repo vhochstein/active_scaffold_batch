@@ -39,8 +39,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_successful?
-      @batch_successful = error_records.empty? if @batch_successful.nil?
-      @batch_successful
+      error_records.empty?
     end
 
     def do_batch

@@ -36,7 +36,6 @@ module ActiveScaffold::Actions
       if record.authorized_for?(:crud_type => :delete)
         destroy_record(record)
       else
-        @batch_successful = false
         record.errors.add(:base, as_(:no_authorization_for_action, :action => action_name))
         error_records << record
       end
@@ -50,7 +49,6 @@ module ActiveScaffold::Actions
       if successful?
         @record.marked = false if batch_scope == 'MARKED'
       else
-        @batch_successful = false
         error_records << @record
       end
     end
