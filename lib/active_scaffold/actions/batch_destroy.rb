@@ -20,6 +20,8 @@ module ActiveScaffold::Actions
       when :delete_all then
         do_search if respond_to? :do_search
         active_scaffold_config.model.delete_all(all_conditions)
+      else
+        Rails.logger.error("Unknown process_mode: #{active_scaffold_config.batch_destroy.process_mode} for action batch_destroy")
       end
       
     end
@@ -33,6 +35,8 @@ module ActiveScaffold::Actions
       when :delete_all then
         active_scaffold_config.model.marked.delete_all
         do_demark_all
+      else
+        Rails.logger.error("Unknown process_mode: #{active_scaffold_config.batch_destroy.process_mode} for action batch_destroy")
       end
     end
 

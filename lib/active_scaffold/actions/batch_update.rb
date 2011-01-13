@@ -120,6 +120,8 @@ module ActiveScaffold::Actions
           # all_conditions might fail cause joins are not working in update_all
           active_scaffold_config.model.update_all(updates, all_conditions)
         end
+      else
+        Rails.logger.error("Unknown process_mode: #{active_scaffold_config.batch_update.process_mode} for action batch_update")
       end
       
     end
@@ -134,6 +136,8 @@ module ActiveScaffold::Actions
           active_scaffold_config.model.marked.update_all(updates)
           do_demark_all
         end
+      else
+        Rails.logger.error("Unknown process_mode: #{active_scaffold_config.batch_update.process_mode} for action batch_update")
       end
     end
 
