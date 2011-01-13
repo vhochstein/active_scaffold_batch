@@ -54,6 +54,10 @@ module ActiveScaffold::Actions
       authorized_for?(:crud_type => :delete)
     end
 
+    def batch_destroy_marked_ignore?(record = nil)
+      !active_scaffold_config.list.columns.include? :marked
+    end
+
     private
 
     def batch_destroy_authorized_filter
