@@ -1,31 +1,33 @@
-# Workaround a problem with script/plugin and http-based repos.
-# See http://dev.rubyonrails.org/ticket/8189
-Dir.chdir(Dir.getwd.sub(/vendor.*/, '')) do
+unless defined?(ACTIVE_SCAFFOLD_INSTALL_ASSETS) && ACTIVE_SCAFFOLD_INSTALL_ASSETS == false
+  # Workaround a problem with script/plugin and http-based repos.
+  # See http://dev.rubyonrails.org/ticket/8189
+  Dir.chdir(Dir.getwd.sub(/vendor.*/, '')) do
 
-##
-## Copy over asset files (javascript/css/images) from the plugin directory to public/
-##
+    ##
+    ## Copy over asset files (javascript/css/images) from the plugin directory to public/
+    ##
 
-def copy_files(source_path, destination_path, directory)
-  source, destination = File.join(directory, source_path), File.join(Rails.root, destination_path)
-  FileUtils.mkdir(destination) unless File.exist?(destination)
-  FileUtils.cp_r(Dir.glob(source+'/*.*'), destination)
-end
+    def copy_files(source_path, destination_path, directory)
+      source, destination = File.join(directory, source_path), File.join(Rails.root, destination_path)
+      FileUtils.mkdir(destination) unless File.exist?(destination)
+      FileUtils.cp_r(Dir.glob(source+'/*.*'), destination)
+    end
 
-directory = File.dirname(__FILE__)
+    directory = File.dirname(__FILE__)
 
-copy_files("/public", "/public", directory)
+    copy_files("/public", "/public", directory)
 
-available_frontends = Dir[File.join(directory, 'frontends', '*')].collect { |d| File.basename d }
-[:stylesheets, :javascripts, :images].each do |asset_type|
-  path = "/public/#{asset_type}/active_scaffold"
-  copy_files(path, path, directory)
+    available_frontends = Dir[File.join(directory, 'frontends', '*')].collect { |d| File.basename d }
+    [:stylesheets, :javascripts, :images].each do |asset_type|
+      path = "/public/#{asset_type}/active_scaffold"
+      copy_files(path, path, directory)
 
-  available_frontends.each do |frontend|
-    source = "/frontends/#{frontend}/#{asset_type}/"
-    destination = "/public/#{asset_type}/active_scaffold/#{frontend}"
-    copy_files(source, destination, directory)
+      available_frontends.each do |frontend|
+        source = "/frontends/#{frontend}/#{asset_type}/"
+        destination = "/public/#{asset_type}/active_scaffold/#{frontend}"
+        copy_files(source, destination, directory)
+      end
+    end
+
   end
-end
-
 end
