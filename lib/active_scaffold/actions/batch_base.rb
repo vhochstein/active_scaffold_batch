@@ -2,7 +2,7 @@ module ActiveScaffold::Actions
   module BatchBase
 
     def self.included(base)
-      base.add_active_scaffold_path File.join(Rails.root, 'vendor', 'plugins', ActiveScaffold::Config::BatchBase.plugin_directory, 'frontends', 'default' , 'views')
+      base.add_active_scaffold_path File.join(ActiveScaffold::Config::BatchBase.plugin_directory, 'frontends', 'default' , 'views')
       base.helper_method :batch_scope
     end
 
