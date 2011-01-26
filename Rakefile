@@ -14,7 +14,7 @@ require './lib/active_scaffold_batch/version.rb'
 
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "active_scaffold_batch"
+  gem.name = "active_scaffold_batch_vho"
   gem.version = ActiveScaffoldBatch::Version::STRING
   gem.homepage = "http://github.com/vhochstein/active_scaffold_batch"
   gem.license = "MIT"
@@ -22,7 +22,7 @@ Jeweler::Tasks.new do |gem|
   gem.description = %Q{You want to destroy/update many records at once with activescaffold?}
   gem.email = "activescaffold@googlegroups.com"
   gem.authors = ["Volker Hochstein"]
-  gem.add_runtime_dependency 'active_scaffold', '~> 3.0.6'
+  gem.add_runtime_dependency 'active_scaffold_vho', '~> 3.0'
   # Include your dependencies below. Runtime dependencies are required when using your gem,
   # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
   #  gem.add_runtime_dependency 'jabber4r', '> 0.1'

@@ -1,4 +1,4 @@
-ACTIVE_SCAFFOLD_BATCH_PLUGIN = true
+ACTIVE_SCAFFOLD_BATCH_INSTALLED = :plugin
 
 require 'active_scaffold_batch'
 

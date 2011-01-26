@@ -24,4 +24,4 @@ Rails::Application.initializer("active_scaffold_batch.install_assets") do
   rescue
     raise $! unless Rails.env == 'production'
   end
-end unless defined?(ACTIVE_SCAFFOLD_BATCH_PLUGIN) && ACTIVE_SCAFFOLD_BATCH_PLUGIN == true
+end unless defined?(ACTIVE_SCAFFOLD_BATCH_INSTALLED) && ACTIVE_SCAFFOLD_BATCH_INSTALLED == :plugin
