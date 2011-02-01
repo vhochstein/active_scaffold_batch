@@ -42,4 +42,4 @@ Rails::Application.initializer("active_scaffold_batch.install_assets", :after =>
   rescue
     raise $! unless Rails.env == 'production'
   end
-end unless defined?(ACTIVE_SCAFFOLD_BATCH_GEM)
+end if defined?(ACTIVE_SCAFFOLD_BATCH_GEM)
