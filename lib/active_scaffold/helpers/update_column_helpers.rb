@@ -13,7 +13,7 @@ module ActiveScaffold
         # second, check if the dev has specified a valid form_ui for this column, using specific ui for searches
         elsif column.form_ui and override_update?(column.form_ui)
           send(override_update(column.form_ui), column, options)
-       elsif column.column and override_update?(column.column.type)
+       elsif column.column && column.form_ui.nil? && override_update?(column.column.type)
           send(override_update(column.column.type), column, options)
         else
           active_scaffold_update_generic_operators_select(column, options)<< ' ' << active_scaffold_render_input(column, options.merge(:name => "record[#{column.name}][value]"))
