@@ -1,9 +1,14 @@
-<% scope ||= nil %>
+<% scope ||= nil
+  scope_select_options = active_scaffold_update_scope_select_options %>
+<% if scope_select_options.length < 2 %>
+  <%= active_scaffold_update_scope_select(scope_select_options) %>
+<% else %>
 <dl>
   <dt>
     <label for="record_batch_scope"><%= as_(:records) %></label>
   </dt>
   <dd>
-    <%= active_scaffold_update_scope_select %>
+    <%= active_scaffold_update_scope_select(scope_select_options) %>
   </dd>
 </dl>
+<% end %>

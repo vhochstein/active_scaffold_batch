@@ -5,6 +5,7 @@ module ActiveScaffold::Config
       super
       @process_mode = self.class.process_mode
       @action_group ||= 'collection.batch'
+      @list_mode_enabled = self.class.list_mode_enabled
     end
 
     # global level configuration
@@ -28,12 +29,18 @@ module ActiveScaffold::Config
     cattr_accessor :process_mode
     @@process_mode = :update
 
-
+    # you may update all records in list view or all marked records
+    # you might disable list mode with this switch if you think it is
+    # too "dangerous"
+    cattr_accessor :list_mode_enabled
+    @@list_mode_enabled = true
     # instance-level configuration
     # ----------------------------
 
     # see class accessor
     attr_accessor :process_mode
+
+    attr_accessor :list_mode_enabled
 
 
     # the label= method already exists in the Form base class
