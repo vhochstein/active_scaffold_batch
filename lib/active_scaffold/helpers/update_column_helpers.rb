@@ -71,6 +71,7 @@ module ActiveScaffold
         select_options = []
         select_options << [as_(:listed), 'LISTED'] if active_scaffold_config.batch_update.list_mode_enabled
         select_options << [as_(:marked), 'MARKED'] if active_scaffold_config.actions.include?(:mark)
+        select_options
       end
 
       ##
