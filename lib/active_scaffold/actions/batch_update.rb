@@ -219,6 +219,10 @@ module ActiveScaffold::Actions
       authorized_for?(:crud_type => :update)
     end
 
+    def batch_update_ignore?(record = nil)
+      false
+    end
+
     def batch_update_value_for_numeric(column, record, calculation_info)
       current_value = record.send(column.name)
       if ActiveScaffold::Actions::BatchUpdate::GenericOperators.include?(calculation_info[:operator]) || ActiveScaffold::Actions::BatchUpdate::NumericOperators.include?(calculation_info[:operator])
