@@ -1,0 +1,34 @@
+<% subsection_id ||= nil %>
+<ol class="form" <%= "id=#{subsection_id}" unless subsection_id.nil? %>  <%= 'style="display: none;"' if columns.collapsed -%>>
+  <li class="form-element">
+    <%= render :partial => 'batch_update_form_attribute_scope' -%>
+  </li>
+  <% columns.each :for => @record do |column| %>
+  <% next if column.plural_association? || (column.association && [:has_one].include?(column.association.macro)) %>
+  <% renders_as = column_renders_as(column) %>
+  <% if renders_as == :subsection -%>
+    <% subsection_id = sub_section_id(:sub_section => column.label) %>
+  <li class="sub-section">
+    <h5><%= column.label %></h5>
+    <%= render :partial => 'form', :locals => { :columns => column, :subsection_id => subsection_id} %>
+    <%= link_to_visibility_toggle(subsection_id, {:default_visible => !column.collapsed}) -%>
+  </li>
+  <% elsif column.readonly_association?
+    next %>
+  <% else
+    renders_as = :field if renders_as == :subform -%>
+  <li class="form-element <%= column.css_class unless column.css_class.nil? %>">
+    <% if column.name == active_scaffold_config.batch_create.batch_column
+         column.options[:html_options] ||= {}
+         column.options[:html_options].merge! :multiple => true
+         column.options[:include_blank] = nil
+       end %>
+    <%= render :partial => form_partial_for_column(column, renders_as), :locals => { :column => column } -%>
+    <% if column.name == active_scaffold_config.batch_create.batch_column
+         column.options[:html_options].delete(:multiple)  
+         column.options.delete(:include_blank)
+       end %>
+  </li>
+  <% end -%>
+  <% end -%>
+</ol>
