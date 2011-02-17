@@ -8,6 +8,7 @@ module ActiveScaffold::Actions
                   :redirect_to => { :action => :index }
       base.helper_method :batch_create_values
       base.helper_method :batch_create_by_column
+      base.helper_method :batch_create_by_records
     end
 
     def batch_new
@@ -37,8 +38,8 @@ module ActiveScaffold::Actions
       @batch_create_values || {}
     end
 
-    def batch_records
-      @batch_records || []
+    def batch_create_by_records
+      @batch_create_by_records || []
     end
 
     def batch_create_respond_to_html
@@ -63,6 +64,21 @@ module ActiveScaffold::Actions
     def do_batch_new
       self.successful = true
       do_new
+      if marked_records_parent
+        batch_scope # that s a dummy call to remove batch_scope parameter
+        column = active_scaffold_config.columns[batch_create_by_column.to_sym]
+        @batch_create_by_records = column_plural_assocation_value_from_value(column, marked_records_parent)
+      end
+    end
+
+    def marked_records_parent
+      if params[:batch_create_by]
+        session_parent = active_scaffold_session_storage(params[:batch_create_by])
+        @marked_records_parent = session_parent[:marked_records] || Set.new
+      else
+        @marked_records_parent = false
+      end if @marked_records_parent.nil?
+      @marked_records_parent
     end
 
     def before_do_batch_create
@@ -84,17 +100,18 @@ module ActiveScaffold::Actions
     def batch_create_listed
       case active_scaffold_config.batch_create.process_mode
       when :create then
-        batch_records.each {|batch_record| create_record(batch_record)}
+        batch_create_by_records.each {|batch_record| create_record(batch_record)}
       else
         Rails.logger.error("Unknown process_mode: #{active_scaffold_config.batch_create.process_mode} for action batch_create")
       end
-      
     end
 
     def batch_create_marked
       case active_scaffold_config.batch_create.process_mode
       when :create then
-        #active_scaffold_config.model.marked.each {|record| create_record(record) if authorized_for_job?(record)}
+        batch_create_by_records.each do |by_record|
+          create_record(by_record)
+        end
       else
         Rails.logger.error("Unknown process_mode: #{active_scaffold_config.batch_create.process_mode} for action batch_create")
       end
@@ -111,7 +128,7 @@ module ActiveScaffold::Actions
       if authorized_for_job?(@record)
         create_save
         if successful?
-          @record.marked = false if batch_scope == 'MARKED'
+          marked_records_parent.delete(batch_record.id) if batch_scope == 'MARKED' && marked_records_parent
         else
           error_records << @record
         end
@@ -141,7 +158,7 @@ module ActiveScaffold::Actions
       values = {}
       columns.each :for => active_scaffold_config.model.new, :crud_type => :create, :flatten => true do |column|
         if batch_create_by_column == column.name
-          @batch_records = column_plural_assocation_value_from_value(column, attributes[column.name])
+          @batch_create_by_records = column_plural_assocation_value_from_value(column, attributes[column.name])
         else
           values[column.name] = {:column => column, :value => column_value_from_param_value(nil, column, attributes[column.name])}
         end if attributes.has_key?(column.name)

@@ -1,7 +1,7 @@
 <% subsection_id ||= nil %>
 <ol class="form" <%= "id=#{subsection_id}" unless subsection_id.nil? %>  <%= 'style="display: none;"' if columns.collapsed -%>>
   <li class="form-element">
-    <%= render :partial => 'batch_update_form_attribute_scope' -%>
+    <%= hidden_field_tag("batch_scope", (batch_scope || 'LISTED')) %>
   </li>
   <% columns.each :for => @record do |column| %>
   <% next if column.plural_association? || (column.association && [:has_one].include?(column.association.macro)) %>
@@ -18,16 +18,7 @@
   <% else
     renders_as = :field if renders_as == :subform -%>
   <li class="form-element <%= column.css_class unless column.css_class.nil? %>">
-    <% if column.name == batch_create_by_column
-         column.options[:html_options] ||= {}
-         column.options[:html_options].merge! :multiple => true
-         column.options[:include_blank] = nil
-       end %>
-    <%= render :partial => form_partial_for_column(column, renders_as), :locals => { :column => column } -%>
-    <% if column.name == batch_create_by_column
-         column.options[:html_options].delete(:multiple)  
-         column.options.delete(:include_blank)
-       end %>
+    <%= render :partial => 'batch_create_form_attribute', :locals => { :column => column } -%>
   </li>
   <% end -%>
   <% end -%>

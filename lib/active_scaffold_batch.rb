@@ -38,6 +38,7 @@ Rails::Application.initializer("active_scaffold_batch.install_assets", :after =>
       elsif ActiveScaffold.js_framework == :prototype
         include ActiveScaffold::Helpers::CalendarDateSelectUpdateColumnHelpers
       end
+      include ActiveScaffold::Helpers::BatchCreateColumnHelpers
     end
   rescue
     raise $! unless Rails.env == 'production'

@@ -13,4 +13,5 @@ ActionView::Base.class_eval do
   elsif ActiveScaffold.js_framework == :prototype
     include ActiveScaffold::Helpers::CalendarDateSelectUpdateColumnHelpers
   end
+  include ActiveScaffold::Helpers::BatchCreateColumnHelpers
 end

@@ -1,10 +1,15 @@
 form_selector = "#{element_form_id(:action => :batch_create)}"
 
 if controller.send :batch_successful?
-  page.call 'ActiveScaffold.replace_html', active_scaffold_content_id, render(:partial => 'list', :layout => false)
+  if params.delete(:batch_create_by).nil?
+    page.call 'ActiveScaffold.replace_html', active_scaffold_content_id, render(:partial => 'list', :layout => false)
+  else
+    #have to uncheck all marked records
+  end
   page << "ActiveScaffold.find_action_link('#{form_selector}').close();"
 else
   page << "ActiveScaffold.find_action_link('#{form_selector}').update_flash_messages('#{escape_javascript(render(:partial => 'messages').strip)}');"
   page.call 'ActiveScaffold.replace', form_selector, render(:partial => 'batch_create_form', :locals => {:xhr => true})
   page.call 'ActiveScaffold.scroll_to', form_selector
+  #have to uncheck successfully created marked_records
 end
