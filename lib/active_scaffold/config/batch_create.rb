@@ -41,7 +41,11 @@ module ActiveScaffold::Config
 
     attr_accessor :list_mode_enabled
 
-    attr_accessor :batch_column
+    # you may use create_batch to create a record for each record
+    # of a belong_to association (reverse must be has_many)
+    # eg. player belongs to team
+    # you may batch create a player records for a list of teams
+    attr_accessor :default_batch_by_column
 
 
     # the label= method already exists in the Form base class

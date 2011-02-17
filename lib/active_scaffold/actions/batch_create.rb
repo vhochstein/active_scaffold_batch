@@ -7,6 +7,7 @@ module ActiveScaffold::Actions
                   :only => :batch_create,
                   :redirect_to => { :action => :index }
       base.helper_method :batch_create_values
+      base.helper_method :batch_create_by_column
     end
 
     def batch_new
@@ -102,7 +103,7 @@ module ActiveScaffold::Actions
     def create_record(batch_record)
       @successful = nil
       @record = new_model
-      @record.send("#{active_scaffold_config.batch_create.batch_column.to_s}=", batch_record)
+      @record.send("#{batch_create_by_column.to_s}=", batch_record)
       batch_create_values.each do |attribute, value|
         set_record_attribute(value[:column], attribute, value[:value])
       end
@@ -131,10 +132,15 @@ module ActiveScaffold::Actions
       form_ui = column.column.type if form_ui.nil? && column.column
     end
 
+    def batch_create_by_column
+      active_scaffold_config.batch_create.default_batch_by_column
+    end
+
+
     def attribute_values_from_params(columns, attributes)
       values = {}
       columns.each :for => active_scaffold_config.model.new, :crud_type => :create, :flatten => true do |column|
-        if active_scaffold_config.batch_create.batch_column == column.name
+        if batch_create_by_column == column.name
           @batch_records = column_plural_assocation_value_from_value(column, attributes[column.name])
         else
           values[column.name] = {:column => column, :value => column_value_from_param_value(nil, column, attributes[column.name])}
