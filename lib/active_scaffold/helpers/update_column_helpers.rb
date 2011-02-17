@@ -63,7 +63,7 @@ module ActiveScaffold
                      options_for_select(select_options, batch_scope || select_options.last[1]),
                      :class => "text_input")
         else
-          hidden_field("batch_scope", :value => select_options.first[1]) unless select_options.empty?
+          hidden_field_tag("batch_scope", select_options.first[1]) unless select_options.empty?
         end
       end
 
