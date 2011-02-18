@@ -1,0 +1,10 @@
+en:
+  active_scaffold:
+    no_update: No Update
+    replace: Replace
+    plus: '+'
+    minus: '-'
+    times: '*'
+    division: '/'
+    absolute: abs
+    percent: '%'

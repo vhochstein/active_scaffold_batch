@@ -24,6 +24,8 @@ module ActiveScaffold
   end
 end
 
+I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'active_scaffold_batch', 'locale', '*.{rb,yml}')]
+
 ##
 ## Run the install assets script, too, just to make sure
 ## But at least rescue the action in production
