@@ -1,10 +1,14 @@
 form_selector = "#{element_form_id(:action => :batch_create)}"
 
 if controller.send :batch_successful?
-  if params.delete(:batch_create_by).nil?
+  called_by_controller = params.delete(:batch_create_by)
+  if called_by_controller.nil?
     page.call 'ActiveScaffold.replace_html', active_scaffold_content_id, render(:partial => 'list', :layout => false)
   else
-    #have to uncheck all marked records
+    options = {:checked => false,
+               :include_mark_all => false}
+    tbody_id = "#{controller_id(called_by_controller)}-tbody"
+    page << "ActiveScaffold.mark_records('#{tbody_id}', #{options.to_json});"
   end
   page << "ActiveScaffold.find_action_link('#{form_selector}').close();"
 else
