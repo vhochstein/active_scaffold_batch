@@ -156,7 +156,7 @@ module ActiveScaffold::Actions
 
     def attribute_values_from_params(columns, attributes)
       values = {}
-      columns.each :for => active_scaffold_config.model.new, :crud_type => :create, :flatten => true do |column|
+      columns.each :for => new_model, :crud_type => :create, :flatten => true do |column|
         if batch_create_by_column == column.name
           @batch_create_by_records = column_plural_assocation_value_from_value(column, attributes[column.name])
         else
