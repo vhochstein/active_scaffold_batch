@@ -1,6 +1,6 @@
 de:
   active_scaffold:
-    no_update: ---
+    no_update: '- Auswählen -'
     replace: Ersetzen
     plus: '+'
     minus: '-'
@@ -8,3 +8,4 @@ de:
     division: '/'
     absolute: abs
     percent: '%'
+    batch_update: 'Speichern'
