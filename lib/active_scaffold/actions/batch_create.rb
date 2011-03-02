@@ -117,9 +117,13 @@ module ActiveScaffold::Actions
       end
     end
 
+    def new_batch_create_record
+      new_model
+    end
+
     def create_record(batch_record)
       @successful = nil
-      @record = new_model
+      @record = new_batch_create_record
       @record.send("#{batch_create_by_column.to_s}=", batch_record)
       batch_create_values.each do |attribute, value|
         set_record_attribute(value[:column], attribute, value[:value])
