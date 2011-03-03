@@ -162,7 +162,7 @@ module ActiveScaffold::Actions
         set_record_attribute(value[:column], attribute, value[:value])
       end
       
-      update_save
+      update_save({:no_record_param_update => true})
       if successful?
         @record.marked = false if batch_scope == 'MARKED'
       else
