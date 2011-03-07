@@ -117,14 +117,14 @@ module ActiveScaffold::Actions
       end
     end
 
-    def new_batch_create_record
+    def new_batch_create_record(created_by)
       new_model
     end
 
-    def create_record(batch_record)
+    def create_record(created_by)
       @successful = nil
-      @record = new_batch_create_record
-      @record.send("#{batch_create_by_column.to_s}=", batch_record)
+      @record = new_batch_create_record(created_by)
+      @record.send("#{batch_create_by_column.to_s}=", created_by)
       batch_create_values.each do |attribute, value|
         set_record_attribute(value[:column], attribute, value[:value])
       end
@@ -132,7 +132,7 @@ module ActiveScaffold::Actions
       if authorized_for_job?(@record)
         create_save
         if successful?
-          marked_records_parent.delete(batch_record.id) if batch_scope == 'MARKED' && marked_records_parent
+          marked_records_parent.delete(created_by.id) if batch_scope == 'MARKED' && marked_records_parent
         else
           error_records << @record
         end
