@@ -19,7 +19,8 @@ module ActiveScaffold::Actions
         end
       when :delete_all then
         do_search if respond_to? :do_search
-        active_scaffold_config.model.delete_all(all_conditions)
+        # dummy condition cause we have to call delete_all on relation not on association
+        beginning_of_chain.where('1=1').delete_all(all_conditions)
       else
         Rails.logger.error("Unknown process_mode: #{active_scaffold_config.batch_destroy.process_mode} for action batch_destroy")
       end
