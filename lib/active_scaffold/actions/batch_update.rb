@@ -206,6 +206,7 @@ module ActiveScaffold::Actions
 
     def attribute_values_from_params(columns, attributes)
       values = {}
+      attributes = {} unless attributes.is_a?(Hash)
       columns.each :for => new_model, :crud_type => :update, :flatten => true do |column|
         values[column.name] = {:column => column, :value => attributes[column.name].merge(:value => column_value_from_param_value(nil, column, attributes[column.name][:value]))} if selected_columns.include? column.name
       end
