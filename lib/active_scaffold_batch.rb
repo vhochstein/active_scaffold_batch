@@ -32,7 +32,6 @@ I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'active_scaffold_batch',
 ##
 Rails::Application.initializer("active_scaffold_batch.install_assets", :after => "active_scaffold.install_assets") do
   begin
-    ActiveScaffoldAssets.copy_to_public(ActiveScaffoldBatch.root)
     ActionView::Base.class_eval do
       include ActiveScaffold::Helpers::UpdateColumnHelpers
       if ActiveScaffold.js_framework == :jquery
