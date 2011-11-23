@@ -1,0 +1,17 @@
+ActiveScaffold batch is a gem which adds batch_update, batch_delete and batch_destroy actions
+to activescaffold, which means you can perform operations on more than justone record.
+
+Rails 3.0 Gem:
+gem 'active_scaffold_batch_vho'
+or
+gem 'active_scaffold_batch_vho', :git => 'git://github.com/vhochstein/active_scaffold_batch.git', :branch => 'rails-3.0'
+
+Rails 3.1 Gem:
+gem 'active_scaffold_config_batch'
+or
+gem 'active_scaffold_config_batch', :git => 'git://github.com/vhochstein/active_scaffold_batch.git'
+
+
+For further details examples please take a look at:
+http://vhochstein.wordpress.com/2010/12/31/activescaffold-batch-update/
+http://vhochstein.wordpress.com/2011/01/14/activescaffold-batch-destroy/
