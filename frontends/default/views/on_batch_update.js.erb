@@ -1,0 +1,10 @@
+<% form_selector = "#{element_form_id(:action => :batch_update)}" %>
+
+<% if controller.send :batch_successful? %>
+  ActiveScaffold.replace_html('<%= active_scaffold_content_id%>','<%=escape_javascript(render(:partial => 'list', :layout => false))%>');
+  ActiveScaffold.find_action_link('<%=form_selector%>').close();
+<% else %>
+  ActiveScaffold.find_action_link('<%=form_selector%>').update_flash_messages('<%=escape_javascript(render(:partial => 'messages').strip)%>');
+  ActiveScaffold.replace('<%=form_selector%>', '<%=escape_javascript(render(:partial => 'batch_update_form', :locals => {:xhr => true}))%>');
+  ActiveScaffold.scroll_to('<%=form_selector%>');
+<% end %>
