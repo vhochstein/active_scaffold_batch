@@ -3,9 +3,6 @@ module ActiveScaffold::Actions
 
     def self.included(base)
       base.before_filter :batch_create_authorized_filter, :only => [:batch_new, :batch_create]
-      base.verify :method => [:post, :put],
-                  :only => :batch_create,
-                  :redirect_to => { :action => :index }
       base.helper_method :batch_create_values
       base.helper_method :batch_create_by_column
       base.helper_method :batch_create_by_records
