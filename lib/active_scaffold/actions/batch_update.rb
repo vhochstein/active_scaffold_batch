@@ -23,9 +23,6 @@ module ActiveScaffold::Actions
     
     def self.included(base)
       base.before_filter :batch_update_authorized_filter, :only => [:batch_edit, :batch_update]
-      base.verify :method => [:post, :put],
-                  :only => :batch_update,
-                  :redirect_to => { :action => :index }
       base.helper_method :batch_update_values
     end
 
