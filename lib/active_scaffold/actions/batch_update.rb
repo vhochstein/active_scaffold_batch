@@ -24,6 +24,7 @@ module ActiveScaffold::Actions
     def self.included(base)
       base.before_filter :batch_update_authorized_filter, :only => [:batch_edit, :batch_update]
       base.helper_method :batch_update_values
+      base.helper_method :batch_update_columns
     end
 
     def batch_edit
@@ -309,14 +310,21 @@ module ActiveScaffold::Actions
       "batch_update_all_value_for_#{form_ui}"
     end
 
-    private
-
     def batch_update_authorized_filter
       link = active_scaffold_config.batch_update.link || active_scaffold_config.batch_update.class.link
       raise ActiveScaffold::ActionNotAllowed unless self.send(link.security_method)
     end
+
     def batch_edit_formats
       (default_formats + active_scaffold_config.formats).uniq
+    end
+
+    def batch_update_columns
+      active_scaffold_config.batch_update.columns
+    end
+
+    def batch_update_columns_names
+      batch_update_columns.collect(&:name)
     end
   end
 end

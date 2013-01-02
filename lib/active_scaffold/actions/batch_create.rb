@@ -6,6 +6,7 @@ module ActiveScaffold::Actions
       base.helper_method :batch_create_values
       base.helper_method :batch_create_by_column
       base.helper_method :batch_create_by_records
+      base.helper_method :batch_create_columns
     end
 
     def batch_new
@@ -186,14 +187,21 @@ module ActiveScaffold::Actions
       "batch_create_value_for_#{form_ui}"
     end
 
-    private
-
     def batch_create_authorized_filter
       link = active_scaffold_config.batch_create.link || active_scaffold_config.batch_create.class.link
       raise ActiveScaffold::ActionNotAllowed unless self.send(link.security_method)
     end
+
     def batch_new_formats
       (default_formats + active_scaffold_config.formats).uniq
+    end
+
+    def batch_create_columns
+      active_scaffold_config.batch_create.columns
+    end
+
+    def batch_create_columns_names
+      batch_create_columns.collect(&:name)
     end
   end
 end
