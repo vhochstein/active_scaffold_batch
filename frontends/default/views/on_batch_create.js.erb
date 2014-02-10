@@ -8,7 +8,7 @@
     <% options = {:checked => false,
                :include_mark_all => false} %>
     <% tbody_id = "#{controller_id(called_by_controller)}-tbody" %>
-    ActiveScaffold.mark_records('<%=tbody_id%>', <%=options.to_json%>);
+    ActiveScaffold.mark_records('<%=tbody_id%>', <%=options.to_json.html_safe%>);
   <% end %>
   ActiveScaffold.find_action_link('<%=form_selector%>').close();
 <% else %>
