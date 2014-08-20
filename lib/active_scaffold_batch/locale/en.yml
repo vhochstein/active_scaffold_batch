@@ -9,3 +9,4 @@ en:
     absolute: abs
     percent: '%'
     batch_update: 'Batch Update'
+    batch_create_record_not_in_scope: 'Failed to create Record for %{model} due to missing data'

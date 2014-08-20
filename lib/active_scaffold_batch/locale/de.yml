@@ -9,3 +9,4 @@ de:
     absolute: abs
     percent: '%'
     batch_update: 'Speichern'
+    batch_create_record_not_in_scope: 'Datensatz für %{model} konnte nicht angelegt werden auf Grund fehlender Daten'
