@@ -17,7 +17,7 @@
     next %>
   <% else
     renders_as = :field if renders_as == :subform -%>
-  <li class="form-element <%= column.css_class unless column.css_class.nil? %>">
+  <li class="form-element <%= column.css_class unless column.css_class.nil? || column.css_class.is_a?(Proc) %>">
     <%= render :partial => 'batch_create_form_attribute', :locals => { :column => column } -%>
   </li>
   <% end -%>
