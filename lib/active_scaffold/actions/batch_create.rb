@@ -79,6 +79,10 @@ module ActiveScaffold::Actions
       @marked_records_parent
     end
 
+    def unmark_parent_record(parent_id)
+      marked_records_parent.delete(parent_id) if batch_scope == 'MARKED' && marked_records_parent
+    end
+
     def before_do_batch_create
       create_columns = active_scaffold_config.batch_create.columns
       @batch_create_values = attribute_values_from_params(create_columns, params[:record])
@@ -132,7 +136,7 @@ module ActiveScaffold::Actions
         if authorized_for_job?(@record)
           create_save
           if successful?
-            marked_records_parent.delete(created_by.id) if batch_scope == 'MARKED' && marked_records_parent
+            unmark_parent_record(created_by.id)
           else
             error_records << @record
           end
