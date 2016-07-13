@@ -16,7 +16,7 @@ module ActiveScaffold::Actions
 
     def process_batch
       do_batch
-      do_search if respond_to? :do_search
+      do_search if respond_to? :do_search, true
       do_list
     end
 
@@ -43,8 +43,8 @@ module ActiveScaffold::Actions
     end
 
     def do_batch
-      send("before_do_#{action_name}") if respond_to?("before_do_#{action_name}")
-      send("#{action_name}_#{batch_scope.downcase}") if !batch_scope.nil? && respond_to?("#{action_name}_#{batch_scope.downcase}")
+      send("before_do_#{action_name}") if respond_to?("before_do_#{action_name}", true)
+      send("#{action_name}_#{batch_scope.downcase}") if !batch_scope.nil? && respond_to?("#{action_name}_#{batch_scope.downcase}", true)
       prepare_error_record unless batch_successful?
     end
 
@@ -59,7 +59,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_base_respond_to_html
-      if respond_to? "#{action_name}_respond_to_html"
+      if respond_to? "#{action_name}_respond_to_html", true
         send("#{action_name}_respond_to_html")
       else
         if params[:iframe]=='true' # was this an iframe post ?
@@ -76,7 +76,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_base_respond_to_js
-      if respond_to? "#{action_name}_respond_to_js"
+      if respond_to? "#{action_name}_respond_to_js", true
         send("#{action_name}_respond_to_js")
       else  
         render :action => "on_batch_base"
@@ -84,7 +84,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_base_respond_to_xml
-      if respond_to? "#{action_name}_respond_to_xml"
+      if respond_to? "#{action_name}_respond_to_xml", true
         send("#{action_name}_respond_to_xml")
       else
         render :xml => response_object.to_xml(:only => active_scaffold_config.send(action_name).columns.names), :content_type => Mime::XML, :status => response_status
@@ -92,7 +92,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_base_respond_to_json
-      if respond_to? "#{action_name}_respond_to_json"
+      if respond_to? "#{action_name}_respond_to_json", true
         send("#{action_name}_respond_to_json")
       else
         render :text => response_object.to_json(:only => active_scaffold_config.send(action_name).columns.names), :content_type => Mime::JSON, :status => response_status
@@ -100,7 +100,7 @@ module ActiveScaffold::Actions
     end
 
     def batch_base_respond_to_yaml
-      if respond_to? "#{action_name}_respond_to_yaml"
+      if respond_to? "#{action_name}_respond_to_yaml", true
         send("#{action_name}_respond_to_yaml")
       else
         render :text => Hash.from_xml(response_object.to_xml(:only => active_scaffold_config.send(action_name).columns.names)).to_yaml, :content_type => Mime::YAML, :status => response_status

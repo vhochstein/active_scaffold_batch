@@ -114,7 +114,7 @@ module ActiveScaffold::Actions
       when :update_all then
         updates = updates_for_update_all
         unless updates.first.empty?
-          do_search if respond_to? :do_search
+          do_search if respond_to? :do_search, true
           # all_conditions might fail cause joins are not working in update_all
           active_scaffold_config.model.update_all(updates, all_conditions)
         end
