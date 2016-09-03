@@ -191,7 +191,7 @@ module ActiveScaffold::Actions
     end
 
     def override_batch_create_value?(form_ui)
-      respond_to?(override_batch_create_value(form_ui))
+      respond_to?(override_batch_create_value(form_ui), true)
     end
 
     def override_batch_create_value(form_ui)

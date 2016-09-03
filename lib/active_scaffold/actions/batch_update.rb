@@ -295,7 +295,7 @@ module ActiveScaffold::Actions
 
 
     def override_batch_update_value?(form_ui)
-      respond_to?(override_batch_update_value(form_ui))
+      respond_to?(override_batch_update_value(form_ui), true)
     end
 
     def override_batch_update_value(form_ui)
@@ -303,7 +303,7 @@ module ActiveScaffold::Actions
     end
 
     def override_batch_update_all_value?(form_ui)
-      respond_to?(override_batch_update_all_value(form_ui))
+      respond_to?(override_batch_update_all_value(form_ui), true)
     end
 
     def override_batch_update_all_value(form_ui)
